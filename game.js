@@ -1,11 +1,35 @@
-
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 const fpsEl = document.getElementById('fps');
 const stateEl = document.getElementById('state');
 
-const WIDTH = canvas.width;
-const HEIGHT = canvas.height;
+// --- Responsive resize setup ---
+const BASE_WIDTH = 800;   // your designed resolution
+const BASE_HEIGHT = 600;
+
+let WIDTH = BASE_WIDTH;
+let HEIGHT = BASE_HEIGHT;
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const scaleX = canvas.width / BASE_WIDTH;
+  const scaleY = canvas.height / BASE_HEIGHT;
+  const scale = Math.min(scaleX, scaleY);
+
+  ctx.setTransform(scale, 0, 0, scale, 0, 0);
+
+  WIDTH = BASE_WIDTH;
+  HEIGHT = BASE_HEIGHT;
+
+  ctx.clearRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
+  scenes[current].draw(); // redraw current scene
+}
+
+window.addEventListener("resize", resizeCanvas);
+resizeCanvas(); // initial call
+// --- end responsive setup ---
 
 // Time
 let last = performance.now();
