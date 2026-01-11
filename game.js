@@ -191,9 +191,9 @@ function spawnCoins(n) {
   return arr;
 }
 
-spawnCoins(10);
-draw();
-LoadScores();
-requestAnimationFrame(loop);
+//spawnCoins(10);
+//draw();
+//LoadScores();
+//requestAnimationFrame(loop);
 
 
