@@ -3,10 +3,9 @@ const ctx = canvas.getContext('2d');
 const fpsEl = document.getElementById('fps');
 const stateEl = document.getElementById('state');
 
-// --- Responsive resize setup ---
-const BASE_WIDTH = 800;   // your designed resolution
+// Fixed base resolution (game world size)
+const BASE_WIDTH = 800;
 const BASE_HEIGHT = 600;
-
 let WIDTH = BASE_WIDTH;
 let HEIGHT = BASE_HEIGHT;
 
@@ -20,16 +19,13 @@ function resizeCanvas() {
 
   ctx.setTransform(scale, 0, 0, scale, 0, 0);
 
-  WIDTH = BASE_WIDTH;
-  HEIGHT = BASE_HEIGHT;
-
+  // Clear and redraw current scene
   ctx.clearRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
-  scenes[current].draw(); // redraw current scene
+  scenes[current].draw();
 }
 
 window.addEventListener("resize", resizeCanvas);
 resizeCanvas(); // initial call
-// --- end responsive setup ---
 
 // Time
 let last = performance.now();
@@ -130,7 +126,7 @@ function drawOverlay(message) {
   drawText(message, WIDTH / 2, HEIGHT / 2, 24, '#e2e8f0', 'center');
 }
 
-// Example game scene (replace with your idea)
+// Example game scene
 function createGameScene() {
   // Entities
   const player = {
