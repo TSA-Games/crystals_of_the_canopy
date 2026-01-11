@@ -1,9 +1,9 @@
 body {
   margin: 0;
-  background: #0f172a;          /* fixed typo: backround → background */
+  background: #0f172a;          /* fixed typo */
   color: #000000;
   font-family: system-ui, sans-serif;
-  overflow: hidden;             /* prevents scrollbars when canvas fills screen */
+  overflow: hidden;             /* prevents scrollbars */
 }
 
 .hud {
@@ -12,7 +12,7 @@ body {
   left: 8px;
   display: grid;
   gap: 8px;
-  background: #0b1222;          /* fixed typo: backround → background */
+  background: #0b1222;          /* fixed typo */
   padding: 8px 12px;
   border: 1px solid #334155;
   border-radius: 8px;
@@ -23,7 +23,7 @@ canvas {
   border: 1px solid #334155;
   border-radius: 8px;
   background: #0b1222;
-  margin: 0;                    /* remove fixed margin so canvas can fill screen */
-  width: 100vw;                 /* make canvas fill viewport width */
-  height: 100vh;                /* make canvas fill viewport height */
+  margin: 0;                    /* remove fixed margin */
+  width: 100vw;                 /* fill viewport width */
+  height: 100vh;                /* fill viewport height */
 }
