@@ -192,7 +192,4 @@ function spawnCoins(n) {
 }
 
 spawnCoins(10);
-LoadScores();
 requestAnimationFrame(loop);
-
-
