@@ -3,29 +3,20 @@ const ctx = canvas.getContext('2d');
 const fpsEl = document.getElementById('fps');
 const stateEl = document.getElementById('state');
 
-// Fixed base resolution (game world size)
+// Fixed game world resolution
 const BASE_WIDTH = 800;
 const BASE_HEIGHT = 600;
-let WIDTH = BASE_WIDTH;
-let HEIGHT = BASE_HEIGHT;
 
-function resizeCanvas() {
+// Actual canvas size (physical pixels)
+function fitCanvasToWindow() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
-
-  const scaleX = canvas.width / BASE_WIDTH;
-  const scaleY = canvas.height / BASE_HEIGHT;
-  const scale = Math.min(scaleX, scaleY);
-
-  ctx.setTransform(scale, 0, 0, scale, 0, 0);
-
-  // Clear and redraw current scene
-  ctx.clearRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
-  scenes[current].draw();
 }
+fitCanvasToWindow();
+window.addEventListener('resize', fitCanvasToWindow);
 
-window.addEventListener("resize", resizeCanvas);
-resizeCanvas(); // initial call
+// Scale computed each frame
+let scale = 1;
 
 // Time
 let last = performance.now();
@@ -42,8 +33,11 @@ window.addEventListener('keydown', (e) => input.keys.add(e.key));
 window.addEventListener('keyup',   (e) => input.keys.delete(e.key));
 canvas.addEventListener('mousemove', (e) => {
   const r = canvas.getBoundingClientRect();
-  input.mouse.x = e.clientX - r.left;
-  input.mouse.y = e.clientY - r.top;
+  // Map physical pixels → game space using current scale
+  const px = e.clientX - r.left;
+  const py = e.clientY - r.top;
+  input.mouse.x = px / scale;
+  input.mouse.y = py / scale;
 });
 canvas.addEventListener('mousedown', () => input.mouse.down = true);
 canvas.addEventListener('mouseup',   () => input.mouse.down = false);
@@ -57,8 +51,8 @@ const scenes = {
     },
     draw() {
       clear();
-      drawText('Your Game Title', WIDTH / 2, HEIGHT / 2 - 20, 28, '#e2e8f0', 'center');
-      drawText('Press Enter or Click to start', WIDTH / 2, HEIGHT / 2 + 20, 16, '#94a3b8', 'center');
+      drawText('Your Game Title', BASE_WIDTH / 2, BASE_HEIGHT / 2 - 20, 28, '#e2e8f0', 'center');
+      drawText('Press Enter or Click to start', BASE_WIDTH / 2, BASE_HEIGHT / 2 + 20, 16, '#94a3b8', 'center');
     },
     exit() {}
   },
@@ -97,14 +91,24 @@ function loop(now) {
   fpsTimer += delta; frames++;
   if (fpsTimer >= 1000) { fpsEl.textContent = frames; fpsTimer = 0; frames = 0; }
 
+  // Compute scale to fit window while preserving aspect
+  const scaleX = canvas.width / BASE_WIDTH;
+  const scaleY = canvas.height / BASE_HEIGHT;
+  scale = Math.min(scaleX, scaleY);
+
+  // Apply transform and clear the virtual canvas
+  ctx.setTransform(scale, 0, 0, scale, 0, 0);
+  ctx.clearRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
+
   // Fixed-step updates
   while (accumulator >= FIXED_DT) {
     scenes[current].update(FIXED_DT / 1000);
     accumulator -= FIXED_DT;
   }
 
-  // Draw
+  // Draw in game space (BASE_WIDTH x BASE_HEIGHT)
   scenes[current].draw();
+
   requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);
@@ -112,7 +116,7 @@ requestAnimationFrame(loop);
 // Utility draw functions
 function clear() {
   ctx.fillStyle = '#0b1222';
-  ctx.fillRect(0, 0, WIDTH, HEIGHT);
+  ctx.fillRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
 }
 function drawText(text, x, y, size = 16, color = '#e2e8f0', align = 'left') {
   ctx.fillStyle = color;
@@ -122,15 +126,15 @@ function drawText(text, x, y, size = 16, color = '#e2e8f0', align = 'left') {
 }
 function drawOverlay(message) {
   ctx.fillStyle = 'rgba(2, 6, 23, 0.6)';
-  ctx.fillRect(0, 0, WIDTH, HEIGHT);
-  drawText(message, WIDTH / 2, HEIGHT / 2, 24, '#e2e8f0', 'center');
+  ctx.fillRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
+  drawText(message, BASE_WIDTH / 2, BASE_HEIGHT / 2, 24, '#e2e8f0', 'center');
 }
 
 // Example game scene
 function createGameScene() {
   // Entities
   const player = {
-    x: WIDTH / 2, y: HEIGHT / 2, w: 24, h: 24, speed: 180, color: '#22c55e'
+    x: BASE_WIDTH / 2, y: BASE_HEIGHT / 2, w: 24, h: 24, speed: 180, color: '#22c55e'
   };
   const coins = spawnCoins(10);
   let score = 0;
@@ -148,8 +152,8 @@ function createGameScene() {
     player.y += (ay / len) * player.speed * dt;
 
     // Bounds
-    player.x = Math.max(0, Math.min(WIDTH - player.w, player.x));
-    player.y = Math.max(0, Math.min(HEIGHT - player.h, player.y));
+    player.x = Math.max(0, Math.min(BASE_WIDTH - player.w, player.x));
+    player.y = Math.max(0, Math.min(BASE_HEIGHT - player.h, player.y));
 
     // Collect
     for (let i = coins.length - 1; i >= 0; i--) {
@@ -172,11 +176,11 @@ function createGameScene() {
     // Grid
     ctx.strokeStyle = '#1f2937';
     ctx.lineWidth = 1;
-    for (let x = 0; x < WIDTH; x += 32) {
-      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, HEIGHT); ctx.stroke();
+    for (let x = 0; x < BASE_WIDTH; x += 32) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, BASE_HEIGHT); ctx.stroke();
     }
-    for (let y = 0; y < HEIGHT; y += 32) {
-      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(WIDTH, y); ctx.stroke();
+    for (let y = 0; y < BASE_HEIGHT; y += 32) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(BASE_WIDTH, y); ctx.stroke();
     }
 
     // Coins
@@ -205,10 +209,4 @@ function rectsOverlap(a, b) {
 function spawnCoins(n) {
   const arr = [];
   for (let i = 0; i < n; i++) {
-    arr.push({ x: Math.random() * (WIDTH - 16), y: Math.random() * (HEIGHT - 16), w: 12, h: 12 });
-  }
-  return arr;
-}
-
-spawnCoins(10);
-requestAnimationFrame(loop);
+    arr.push({ x
