@@ -1,4 +1,3 @@
-// Basic engine scaffold for a canvas game on GitHub Pages
 
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
