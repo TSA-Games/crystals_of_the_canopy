@@ -1,6 +1,9 @@
 body {
   margin: 0;
-  background: #0f172a;
+  background-image: url('images/forest.png'); /* forest background */
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
   color: #000000;
   font-family: system-ui, sans-serif;
   overflow: hidden;
@@ -12,7 +15,7 @@ body {
   left: 8px;
   display: grid;
   gap: 8px;
-  background: #0b1222;
+  background: rgba(11, 18, 34, 0.7); /* semi-transparent so forest shows through */
   padding: 8px 12px;
   border: 1px solid #334155;
   border-radius: 8px;
@@ -23,7 +26,7 @@ canvas {
   display: block;
   border: 1px solid #334155;
   border-radius: 8px;
-  background: #0b1222;
+  background: transparent; /* let forest background show through */
   margin: 0;
   width: 100vw;
   height: 100vh;
