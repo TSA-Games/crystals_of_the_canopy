@@ -28,9 +28,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const r = canvas.getBoundingClientRect();
     const px = e.clientX - r.left;
     const py = e.clientY - r.top;
-    // scale is computed each frame; we’ll use lastScale to map mouse
-    input.mouse.x = px / lastScale;
-    input.mouse.y = py / lastScale;
+    // Map mouse into game space using current transform
+    input.mouse.x = (px - offsetX) / lastScale;
+    input.mouse.y = (py - offsetY) / lastScale;
   });
   canvas.addEventListener('mousedown', () => input.mouse.down = true);
   canvas.addEventListener('mouseup',   () => input.mouse.down = false);
@@ -83,8 +83,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // FPS
   let frames = 0, fpsTimer = 0;
 
-  // Scale cache for input mapping
+  // Scale + offset cache
   let lastScale = 1;
+  let offsetX = 0;
+  let offsetY = 0;
 
   function loop(now) {
     const delta = now - last;
@@ -99,8 +101,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const scale = Math.min(scaleX, scaleY);
     lastScale = scale;
 
-    // Apply transform and clear the virtual canvas
-    ctx.setTransform(scale, 0, 0, scale, 0, 0);
+    // Compute offset to center the game
+    offsetX = (canvas.width - BASE_WIDTH * scale) / 2;
+    offsetY = (canvas.height - BASE_HEIGHT * scale) / 2;
+
+    // Apply transform: scale + translate
+    ctx.setTransform(scale, 0, 0, scale, offsetX, offsetY);
     ctx.clearRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
 
     // Fixed-step updates
