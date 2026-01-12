@@ -4,14 +4,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const fpsEl = document.getElementById('fps');
   const stateEl = document.getElementById('state');
 
-  // Fixed game world resolution
-  const BASE_WIDTH = 800;
-  const BASE_HEIGHT = 600;
+  // Dynamic world size
+  let WIDTH = window.innerWidth;
+  let HEIGHT = window.innerHeight;
 
-  // Ensure canvas has physical pixel size
   function fitCanvasToWindow() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+    WIDTH = canvas.width;
+    HEIGHT = canvas.height;
   }
   fitCanvasToWindow();
   window.addEventListener('resize', fitCanvasToWindow);
@@ -26,11 +27,8 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('keyup',   (e) => input.keys.delete(e.key));
   canvas.addEventListener('mousemove', (e) => {
     const r = canvas.getBoundingClientRect();
-    const px = e.clientX - r.left;
-    const py = e.clientY - r.top;
-    // Map mouse into game space using current transform
-    input.mouse.x = (px - offsetX) / lastScale;
-    input.mouse.y = (py - offsetY) / lastScale;
+    input.mouse.x = e.clientX - r.left;
+    input.mouse.y = e.clientY - r.top;
   });
   canvas.addEventListener('mousedown', () => input.mouse.down = true);
   canvas.addEventListener('mouseup',   () => input.mouse.down = false);
@@ -44,8 +42,8 @@ document.addEventListener('DOMContentLoaded', () => {
       },
       draw() {
         clear();
-        drawText('Your Game Title', BASE_WIDTH / 2, BASE_HEIGHT / 2 - 20, 28, '#e2e8f0', 'center');
-        drawText('Press Enter or Click to start', BASE_WIDTH / 2, BASE_HEIGHT / 2 + 20, 16, '#94a3b8', 'center');
+        drawText('Your Game Title', WIDTH / 2, HEIGHT / 2 - 20, 28, '#e2e8f0', 'center');
+        drawText('Press Enter or Click to start', WIDTH / 2, HEIGHT / 2 + 20, 16, '#94a3b8', 'center');
       },
       exit() {}
     },
@@ -69,9 +67,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function setScene(name) {
     if (name === current) return;
-    if (scenes[current].exit) scenes[current].exit();
+    scenes[current].exit?.();
     current = name;
-    if (scenes[current].enter) scenes[current].enter();
+    scenes[current].enter?.();
     stateEl.textContent = current;
   }
 
@@ -83,11 +81,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // FPS
   let frames = 0, fpsTimer = 0;
 
-  // Scale + offset cache
-  let lastScale = 1;
-  let offsetX = 0;
-  let offsetY = 0;
-
   function loop(now) {
     const delta = now - last;
     last = now;
@@ -95,19 +88,9 @@ document.addEventListener('DOMContentLoaded', () => {
     fpsTimer += delta; frames++;
     if (fpsTimer >= 1000) { fpsEl.textContent = frames; fpsTimer = 0; frames = 0; }
 
-    // Compute scale to fit window while preserving aspect
-    const scaleX = canvas.width / BASE_WIDTH;
-    const scaleY = canvas.height / BASE_HEIGHT;
-    const scale = Math.min(scaleX, scaleY);
-    lastScale = scale;
-
-    // Compute offset to center the game
-    offsetX = (canvas.width - BASE_WIDTH * scale) / 2;
-    offsetY = (canvas.height - BASE_HEIGHT * scale) / 2;
-
-    // Apply transform: scale + translate
-    ctx.setTransform(scale, 0, 0, scale, offsetX, offsetY);
-    ctx.clearRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
+    // Clear full dynamic canvas
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
     // Fixed-step updates
     while (accumulator >= FIXED_DT) {
@@ -115,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
       accumulator -= FIXED_DT;
     }
 
-    // Draw in game space (BASE_WIDTH x BASE_HEIGHT)
+    // Draw using dynamic WIDTH/HEIGHT
     scenes[current].draw();
 
     requestAnimationFrame(loop);
@@ -125,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Utility draw functions
   function clear() {
     ctx.fillStyle = '#0b1222';
-    ctx.fillRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
+    ctx.fillRect(0, 0, WIDTH, HEIGHT);
   }
   function drawText(text, x, y, size = 16, color = '#e2e8f0', align = 'left') {
     ctx.fillStyle = color;
@@ -135,19 +118,24 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   function drawOverlay(message) {
     ctx.fillStyle = 'rgba(2, 6, 23, 0.6)';
-    ctx.fillRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
-    drawText(message, BASE_WIDTH / 2, BASE_HEIGHT / 2, 24, '#e2e8f0', 'center');
+    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    drawText(message, WIDTH / 2, HEIGHT / 2, 24, '#e2e8f0', 'center');
   }
 
   // Example game scene
   function createGameScene() {
     const player = {
-      x: BASE_WIDTH / 2, y: BASE_HEIGHT / 2, w: 24, h: 24, speed: 180, color: '#22c55e'
+      x: WIDTH / 2, y: HEIGHT / 2, w: 24, h: 24, speed: 180, color: '#22c55e'
     };
-    const coins = spawnCoins(10);
+    let coins = spawnCoins(10);
     let score = 0;
 
-    function enter() {}
+    function enter() {
+      coins = spawnCoins(10); // respawn coins when entering
+      score = 0;
+      player.x = WIDTH / 2;
+      player.y = HEIGHT / 2;
+    }
 
     function update(dt) {
       const ax = (input.keys.has('ArrowRight') || input.keys.has('d')) - (input.keys.has('ArrowLeft') || input.keys.has('a'));
@@ -156,8 +144,8 @@ document.addEventListener('DOMContentLoaded', () => {
       player.x += (ax / len) * player.speed * dt;
       player.y += (ay / len) * player.speed * dt;
 
-      player.x = Math.max(0, Math.min(BASE_WIDTH - player.w, player.x));
-      player.y = Math.max(0, Math.min(BASE_HEIGHT - player.h, player.y));
+      player.x = Math.max(0, Math.min(WIDTH - player.w, player.x));
+      player.y = Math.max(0, Math.min(HEIGHT - player.h, player.y));
 
       for (let i = coins.length - 1; i >= 0; i--) {
         const c = coins[i];
@@ -177,11 +165,11 @@ document.addEventListener('DOMContentLoaded', () => {
       // Grid
       ctx.strokeStyle = '#1f2937';
       ctx.lineWidth = 1;
-      for (let x = 0; x < BASE_WIDTH; x += 32) {
-        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, BASE_HEIGHT); ctx.stroke();
+      for (let x = 0; x < WIDTH; x += 32) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, HEIGHT); ctx.stroke();
       }
-      for (let y = 0; y < BASE_HEIGHT; y += 32) {
-        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(BASE_WIDTH, y); ctx.stroke();
+      for (let y = 0; y < HEIGHT; y += 32) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(WIDTH, y); ctx.stroke();
       }
 
       // Coins
@@ -210,7 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function spawnCoins(n) {
     const arr = [];
     for (let i = 0; i < n; i++) {
-      arr.push({ x: Math.random() * (BASE_WIDTH - 16), y: Math.random() * (BASE_HEIGHT - 16), w: 12, h: 12 });
+      arr.push({ x: Math.random() * (WIDTH - 16), y: Math.random() * (HEIGHT - 16), w: 12, h: 12 });
     }
     return arr;
   }
