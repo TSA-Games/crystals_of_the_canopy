@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
       },
       draw() {
         clear();
-        drawText('Your Game Title', WIDTH / 2, HEIGHT / 2 - 20, 28, '#e2e8f0', 'center');
+        drawText('Crystals of the Canopy', WIDTH / 2, HEIGHT / 2 - 20, 28, '#e2e8f0', 'center');
         drawText('Press Enter or Click to start', WIDTH / 2, HEIGHT / 2 + 20, 16, '#94a3b8', 'center');
       },
       exit() {}
@@ -88,9 +88,9 @@ document.addEventListener('DOMContentLoaded', () => {
     fpsTimer += delta; frames++;
     if (fpsTimer >= 1000) { fpsEl.textContent = frames; fpsTimer = 0; frames = 0; }
 
-    // Clear full dynamic canvas
+    // Clear full dynamic canvas (transparent so forest background shows)
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.clearRect(0, 0, WIDTH, HEIGHT);
+    clear();
 
     // Fixed-step updates
     while (accumulator >= FIXED_DT) {
@@ -107,8 +107,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Utility draw functions
   function clear() {
-    ctx.fillStyle = '#0b1222';
-    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    ctx.clearRect(0, 0, WIDTH, HEIGHT);
+    // Optional: add a subtle overlay tint so text/sprites pop
+    // ctx.fillStyle = 'rgba(11, 18, 34, 0.3)';
+    // ctx.fillRect(0, 0, WIDTH, HEIGHT);
   }
   function drawText(text, x, y, size = 16, color = '#e2e8f0', align = 'left') {
     ctx.fillStyle = color;
@@ -131,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let score = 0;
 
     function enter() {
-      coins = spawnCoins(10); // respawn coins when entering
+      coins = spawnCoins(10);
       score = 0;
       player.x = WIDTH / 2;
       player.y = HEIGHT / 2;
