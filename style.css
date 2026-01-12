@@ -1,9 +1,9 @@
 body {
   margin: 0;
-  background: #0f172a;          /* fixed typo */
+  background: #0f172a;
   color: #000000;
   font-family: system-ui, sans-serif;
-  overflow: hidden;             /* prevents scrollbars */
+  overflow: hidden;
 }
 
 .hud {
@@ -12,10 +12,11 @@ body {
   left: 8px;
   display: grid;
   gap: 8px;
-  background: #0b1222;          /* fixed typo */
+  background: #0b1222;
   padding: 8px 12px;
   border: 1px solid #334155;
   border-radius: 8px;
+  color: #e2e8f0;
 }
 
 canvas {
@@ -23,7 +24,7 @@ canvas {
   border: 1px solid #334155;
   border-radius: 8px;
   background: #0b1222;
-  margin: 0;                    /* remove fixed margin */
-  width: 100vw;                 /* fill viewport width */
-  height: 100vh;                /* fill viewport height */
+  margin: 0;
+  width: 100vw;
+  height: 100vh;
 }
