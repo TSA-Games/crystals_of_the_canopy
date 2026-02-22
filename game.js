@@ -109,8 +109,8 @@ document.addEventListener('DOMContentLoaded', () => {
   function clear() {
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
     // Optional: add a subtle overlay tint so text/sprites pop
-    // ctx.fillStyle = 'rgba(11, 18, 34, 0.3)';
-    // ctx.fillRect(0, 0, WIDTH, HEIGHT);
+     ctx.fillStyle = 'rgba(11, 18, 34, 0.3)';
+     ctx.fillRect(0, 0, WIDTH, HEIGHT);
   }
   function drawText(text, x, y, size = 16, color = '#e2e8f0', align = 'left') {
     ctx.fillStyle = color;
