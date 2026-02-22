@@ -1,33 +1,52 @@
-body {
+* {
+  box-sizing: border-box;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+html, body {
   margin: 0;
-  background-image: url('images/forest background.jpeg'); /* forest background */
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-image: url('images/forest background.jpeg');
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
+  background-attachment: fixed;
   color: #000000;
-  font-family: system-ui, sans-serif;
-  overflow: hidden;
+  font-family: system-ui, -apple-system, sans-serif;
 }
 
 .hud {
   position: fixed;
-  top: 8px;
-  left: 8px;
+  top: 1rem;
+  left: 1rem;
   display: grid;
-  gap: 8px;
-  background: rgba(11, 18, 34, 0.7); /* semi-transparent so forest shows through */
-  padding: 8px 12px;
+  gap: 0.5rem;
+  background: rgba(11, 18, 34, 0.7);
+  padding: 0.75rem 1rem;
   border: 1px solid #334155;
-  border-radius: 8px;
+  border-radius: 0.5rem;
   color: #e2e8f0;
+  font-size: clamp(12px, 2vw, 16px);
+  z-index: 10;
+  pointer-events: none;
 }
 
 canvas {
   display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
   border: 1px solid #334155;
-  border-radius: 8px;
-  background: transparent; /* let forest background show through */
+  border-radius: 0;
+  background: transparent;
   margin: 0;
+  padding: 0;
   width: 100vw;
   height: 100vh;
+  touch-action: none;
 }
