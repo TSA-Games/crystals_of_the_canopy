@@ -42,24 +42,40 @@
     walkTimer: 0,
   };
 
-  const groundY = 900; // world coordinate of the flat ground
+  const groundY = 900; // world coordinate of the flat ground - INSTANT RESET ZONE
   const platforms = [];
   const crystals = [];
   const coins = [];
+  const levelEndX = 3200; // winning x position
 
   let score = 0;
   let coinsCollected = 0;
+  let gameWon = false;
+  let justReset = false;
+
+  function _resetGame() {
+    player.x = 400;
+    player.y = 300;
+    player.vx = 0;
+    player.vy = 0;
+    player.onGround = false;
+    score = 0;
+    coinsCollected = 0;
+    gameWon = false;
+    justReset = true;
+    _spawnPickups(14, 10);
+  }
 
   function _spawnPlatforms() {
     platforms.length = 0;
-    // spread platforms across world space
-    platforms.push({ x: 0, y: groundY, w: 10000, h: 48 }); // ground (very wide)
-    platforms.push({ x: 200, y: groundY - 160, w: 220, h: 16 });
-    platforms.push({ x: 520, y: groundY - 220, w: 200, h: 16 });
-    platforms.push({ x: 880, y: groundY - 120, w: 240, h: 16 });
-    platforms.push({ x: 1280, y: groundY - 300, w: 260, h: 16 });
-    platforms.push({ x: 1640, y: groundY - 220, w: 180, h: 16 });
-    platforms.push({ x: -320, y: groundY - 280, w: 200, h: 16 });
+    // NO GROUND PLATFORM - falling to groundY means instant reset!
+    // Bridge platforms spread across the page horizontally
+    platforms.push({ x: 600, y: groundY - 120, w: 280, h: 16 });   // Start bridge
+    platforms.push({ x: 1050, y: groundY - 180, w: 320, h: 16 });  // Second bridge
+    platforms.push({ x: 1520, y: groundY - 140, w: 280, h: 16 });  // Third bridge
+    platforms.push({ x: 1950, y: groundY - 220, w: 300, h: 16 });  // Fourth bridge
+    platforms.push({ x: 2450, y: groundY - 160, w: 320, h: 16 });  // Fifth bridge
+    platforms.push({ x: 2950, y: groundY - 240, w: 280, h: 16 });  // Final bridge to win
   }
 
   function _spawnPickups(nCrystals = 12, nCoins = 8) {
@@ -82,6 +98,7 @@
 
   _spawnPlatforms();
   _spawnPickups(14, 10);
+  _resetGame();
 
   // helpers for world->screen
   function worldToScreen(wx, wy) {
@@ -152,11 +169,15 @@
       }
     }
 
-    // ground fallback if no platform landed
-    if (!player.onGround && player.y + halfH > groundY) {
-      player.y = groundY - halfH;
-      player.vy = 0;
-      player.onGround = true;
+    // CHECK IF TOUCHED GROUND - INSTANT RESET!
+    if (player.y + halfH > groundY) {
+      _resetGame();
+      return; // skip the rest of this update
+    }
+
+    // CHECK IF WON - REACHED THE END
+    if (player.x > levelEndX && !gameWon) {
+      gameWon = true;
     }
 
     // update walk timer for animation
@@ -188,6 +209,9 @@
 
     // respawn pickups if cleared
     if (crystals.length + coins.length === 0) _spawnPickups(14, 10);
+
+    // Clear reset flag after first frame
+    justReset = false;
   }
 
   // rendering
@@ -234,6 +258,21 @@
     ctx.textBaseline = 'middle';
     ctx.fillText(`Score: ${score}`, 16 * pixelRatio, 28 * pixelRatio);
     ctx.fillText(`Coins: ${coinsCollected}`, 110 * pixelRatio, 28 * pixelRatio);
+
+    // Draw WIN message
+    if (gameWon) {
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.fillStyle = 'rgba(0,0,0,0.7)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#00ff00';
+      ctx.font = `bold ${80 * pixelRatio}px Arial`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('YOU WIN!', canvas.width / 2, canvas.height / 2);
+      ctx.fillStyle = '#ffff00';
+      ctx.font = `${32 * pixelRatio}px Arial`;
+      ctx.fillText(`Final Score: ${score}`, canvas.width / 2, canvas.height / 2 + 60 * pixelRatio);
+    }
 
     ctx.restore();
   }
