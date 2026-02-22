@@ -1,332 +1,398 @@
-document.addEventListener('DOMContentLoaded', () => {
+// Clean, self-contained canvas game script
+(function () {
   const canvas = document.getElementById('game');
   const ctx = canvas.getContext('2d');
   const fpsEl = document.getElementById('fps');
   const stateEl = document.getElementById('state');
 
-  // Dynamic world size
-  let WIDTH = window.innerWidth;
-  let HEIGHT = window.innerHeight;
+  let width = 800;
+  let height = 600;
+  const pixelRatio = Math.max(1, window.devicePixelRatio || 1);
 
-  function fitCanvasToWindow() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    WIDTH = canvas.width;
-    HEIGHT = canvas.height;
+  function resize() {
+    width = Math.max(320, window.innerWidth);
+    height = Math.max(240, window.innerHeight);
+    canvas.style.width = width + 'px';
+    canvas.style.height = height + 'px';
+    canvas.width = Math.floor(width * pixelRatio);
+    canvas.height = Math.floor(height * pixelRatio);
+    ctx.imageSmoothingEnabled = false;
   }
-  fitCanvasToWindow();
-  window.addEventListener('resize', fitCanvasToWindow);
+  window.addEventListener('resize', resize);
+  resize();
 
   // Input
-  const input = {
-    keys: new Set(),
-    mouse: { x: 0, y: 0, down: false }
+  const keys = {};
+  window.addEventListener('keydown', (e) => (keys[e.key] = true));
+  window.addEventListener('keyup', (e) => (keys[e.key] = false));
+
+  // World
+  const player = {
+    x: 400,
+    y: 300,
+    w: 28,
+    h: 40,
+    vx: 0,
+    vy: 0,
+    speed: 260,
+    jumpSpeed: 820, // higher jump
+    gravity: 2200,
+    friction: 8,
+    onGround: false,
+    walkTimer: 0,
   };
 
-  window.addEventListener('keydown', (e) => input.keys.add(e.key));
-  window.addEventListener('keyup',   (e) => input.keys.delete(e.key));
-  canvas.addEventListener('mousemove', (e) => {
-    const r = canvas.getBoundingClientRect();
-    input.mouse.x = e.clientX - r.left;
-    input.mouse.y = e.clientY - r.top;
-  });
-  canvas.addEventListener('mousedown', () => input.mouse.down = true);
-  canvas.addEventListener('mouseup',   () => input.mouse.down = false);
+  const groundY = 900; // world coordinate of the flat ground
+  const platforms = [];
+  const crystals = [];
+  const coins = [];
 
-  // Scenes
-  const scenes = {
-    menu: {
-      enter() {},
-      update(dt) {
-        if (input.keys.has('Enter') || input.mouse.down) setScene('game');
-      },
-      draw() {
-        clear();
-        drawText('Crystals of the Canopy', WIDTH / 2, HEIGHT / 2 - 20, 28, '#e2e8f0', 'center');
-        drawText('Press Enter or Click to start', WIDTH / 2, HEIGHT / 2 + 20, 16, '#94a3b8', 'center');
-      },
-      exit() {}
-    },
-    game: createGameScene(),
-    pause: {
-      enter() {},
-      update(dt) {
-        if (input.keys.has('Escape')) setScene('game');
-      },
-      draw() {
-        scenes.game.draw();
-        drawOverlay('Paused (press Esc)');
-      },
-      exit() {}
-    }
-  };
+  let score = 0;
+  let coinsCollected = 0;
 
-  let current = 'menu';
-  scenes[current].enter();
-  stateEl.textContent = current;
-
-  function setScene(name) {
-    if (name === current) return;
-    scenes[current].exit?.();
-    current = name;
-    scenes[current].enter?.();
-    stateEl.textContent = current;
+  function _spawnPlatforms() {
+    platforms.length = 0;
+    // spread platforms across world space
+    platforms.push({ x: 0, y: groundY, w: 10000, h: 48 }); // ground (very wide)
+    platforms.push({ x: 200, y: groundY - 160, w: 220, h: 16 });
+    platforms.push({ x: 520, y: groundY - 220, w: 200, h: 16 });
+    platforms.push({ x: 880, y: groundY - 120, w: 240, h: 16 });
+    platforms.push({ x: 1280, y: groundY - 300, w: 260, h: 16 });
+    platforms.push({ x: 1640, y: groundY - 220, w: 180, h: 16 });
+    platforms.push({ x: -320, y: groundY - 280, w: 200, h: 16 });
   }
 
-  // Time
-  let last = performance.now();
-  let accumulator = 0;
-  const FIXED_DT = 1000 / 60; // 60 updates per second
-
-  // FPS
-  let frames = 0, fpsTimer = 0;
-
-  function loop(now) {
-    const delta = now - last;
-    last = now;
-    accumulator += delta;
-    fpsTimer += delta; frames++;
-    if (fpsTimer >= 1000) { fpsEl.textContent = frames; fpsTimer = 0; frames = 0; }
-
-    // Clear full dynamic canvas (transparent so forest background shows)
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    clear();
-
-    // Fixed-step updates
-    while (accumulator >= FIXED_DT) {
-      scenes[current].update(FIXED_DT / 1000);
-      accumulator -= FIXED_DT;
+  function _spawnPickups(nCrystals = 12, nCoins = 8) {
+    crystals.length = 0;
+    coins.length = 0;
+    for (let i = 0; i < nCrystals; i++) {
+      // place some crystals on platforms or floating
+      const p = platforms[Math.floor(Math.random() * platforms.length)];
+      const x = (p.x - 200) + Math.random() * (p.w + 400);
+      const y = (Math.random() < 0.7) ? p.y - 28 - Math.random() * 8 : groundY - 200 - Math.random() * 500;
+      crystals.push({ x: x + Math.random() * 40 - 20, y: y + Math.random() * 10 - 5, r: 10 + Math.random() * 12, hue: Math.floor(Math.random() * 360) });
     }
+    for (let i = 0; i < nCoins; i++) {
+      const p = platforms[Math.floor(Math.random() * platforms.length)];
+      const x = p.x + 20 + Math.random() * Math.max(16, p.w - 40);
+      const y = p.y - 18 - Math.random() * 6;
+      coins.push({ x, y, r: 8 + Math.random() * 6 });
+    }
+  }
 
-    // Draw using dynamic WIDTH/HEIGHT
-    scenes[current].draw();
+  _spawnPlatforms();
+  _spawnPickups(14, 10);
 
+  // helpers for world->screen
+  function worldToScreen(wx, wy) {
+    // simple camera centered on player
+    const camX = player.x - width / 2;
+    const camY = player.y - height / 2;
+    return { x: Math.round((wx - camX) * pixelRatio), y: Math.round((wy - camY) * pixelRatio) };
+  }
+
+  // physics and update
+  let lastTime = performance.now();
+  function loop(now) {
+    const dt = Math.min(0.033, (now - lastTime) / 1000);
+    lastTime = now;
+    _update(dt);
+    _render();
     requestAnimationFrame(loop);
   }
   requestAnimationFrame(loop);
 
-  // Utility draw functions
-  function clear() {
-    ctx.clearRect(0, 0, WIDTH, HEIGHT);
-    // Optional: add a subtle overlay tint so text/sprites pop
-     ctx.fillStyle = 'rgba(11, 18, 34, 0.3)';
-     ctx.fillRect(0, 0, WIDTH, HEIGHT);
+  function _update(dt) {
+    // input
+    const left = keys.ArrowLeft || keys.a;
+    const right = keys.ArrowRight || keys.d;
+    const jump = keys.ArrowUp || keys.w || keys[' '];
+
+    // horizontal
+    if (left && !right) player.vx = -player.speed;
+    else if (right && !left) player.vx = player.speed;
+    else {
+      player.vx *= Math.max(0, 1 - player.friction * dt);
+      if (Math.abs(player.vx) < 1) player.vx = 0;
+    }
+
+    // jump
+    if (jump && player.onGround) {
+      player.vy = -player.jumpSpeed;
+      player.onGround = false;
+    }
+
+    // gravity
+    player.vy += player.gravity * dt;
+
+    // integrate with prevY for platform collision detection
+    const prevY = player.y;
+    player.x += player.vx * dt;
+    player.y += player.vy * dt;
+
+    // platform collisions
+    player.onGround = false;
+    const halfH = player.h / 2;
+    for (const p of platforms) {
+      const top = p.y - p.h; // since platform stored with y as bottom for convenience
+      // We'll treat p.y as the top of platform (we stored top earlier), but to be robust accept either
+      const platTop = p.y - p.h >= 0 ? p.y - p.h : p.y; // fallback
+      const platLeft = p.x - p.w / 2;
+      const platRight = p.x + p.w / 2;
+      // treat platform as rectangle at (p.x - p.w/2, p.y - p.h) width p.w height p.h
+      const px = p.x - p.w / 2;
+      const py = p.y - p.h;
+      if (player.x + player.w / 2 > px && player.x - player.w / 2 < px + p.w) {
+        // was above and now below or touching
+        if (prevY + halfH <= py && player.y + halfH >= py) {
+          player.y = py - halfH;
+          player.vy = 0;
+          player.onGround = true;
+        }
+      }
+    }
+
+    // ground fallback if no platform landed
+    if (!player.onGround && player.y + halfH > groundY) {
+      player.y = groundY - halfH;
+      player.vy = 0;
+      player.onGround = true;
+    }
+
+    // update walk timer for animation
+    if (Math.abs(player.vx) > 1 && player.onGround) player.walkTimer += dt * (Math.abs(player.vx) / player.speed) * 8;
+    else player.walkTimer += dt * 1.2; // idle breathing
+
+    // collect crystals
+    for (let i = crystals.length - 1; i >= 0; i--) {
+      const c = crystals[i];
+      const dx = c.x - player.x;
+      const dy = c.y - player.y;
+      if (Math.hypot(dx, dy) < c.r + Math.max(player.w, player.h) / 2) {
+        crystals.splice(i, 1);
+        score += 5;
+      }
+    }
+
+    // collect coins
+    for (let i = coins.length - 1; i >= 0; i--) {
+      const c = coins[i];
+      const dx = c.x - player.x;
+      const dy = c.y - player.y;
+      if (Math.hypot(dx, dy) < c.r + Math.max(player.w, player.h) / 2) {
+        coins.splice(i, 1);
+        coinsCollected++;
+        score += 10;
+      }
+    }
+
+    // respawn pickups if cleared
+    if (crystals.length + coins.length === 0) _spawnPickups(14, 10);
   }
-  function drawText(text, x, y, size = 16, color = '#e2e8f0', align = 'left') {
-    ctx.fillStyle = color;
-    ctx.font = `bold ${size}px system-ui, sans-serif`;
-    ctx.textAlign = align;
-    ctx.fillText(text, x, y);
+
+  // rendering
+  function _render() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // background gradient
+    const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    g.addColorStop(0, '#7ec8ff');
+    g.addColorStop(1, '#2b6b3b');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // camera
+    const camX = player.x - width / 2;
+    const camY = player.y - height / 2;
+
+    // draw platforms
+    ctx.save();
+    ctx.scale(pixelRatio, pixelRatio);
+    ctx.translate(-camX, -camY);
+    for (const p of platforms) {
+      ctx.fillStyle = '#6b4b2b';
+      ctx.fillRect(p.x - p.w / 2, p.y - p.h, p.w, p.h);
+      ctx.fillStyle = '#533f2a';
+      ctx.fillRect(p.x - p.w / 2, p.y - p.h + p.h, p.w, 3);
+    }
+
+    // draw crystals
+    for (const c of crystals) drawCrystal(ctx, c.x, c.y, c.r, c.hue, pixelRatio);
+
+    // draw coins
+    for (const c of coins) drawCoin(ctx, c.x, c.y, c.r, pixelRatio);
+
+    // draw player (human-ish) with simple limbs animation
+    drawPlayer(ctx, player, pixelRatio);
+
+    // HUD
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+    ctx.fillRect(8 * pixelRatio, 8 * pixelRatio, 180 * pixelRatio, 40 * pixelRatio);
+    ctx.fillStyle = '#fff';
+    ctx.font = `${14 * pixelRatio}px monospace`;
+    ctx.textBaseline = 'middle';
+    ctx.fillText(`Score: ${score}`, 16 * pixelRatio, 28 * pixelRatio);
+    ctx.fillText(`Coins: ${coinsCollected}`, 110 * pixelRatio, 28 * pixelRatio);
+
+    ctx.restore();
   }
-  function drawOverlay(message) {
-    ctx.fillStyle = 'rgba(2, 6, 23, 0.6)';
-    ctx.fillRect(0, 0, WIDTH, HEIGHT);
-    drawText(message, WIDTH / 2, HEIGHT / 2, 24, '#e2e8f0', 'center');
+
+  // drawPlayer: simple human with swinging limbs
+  function drawPlayer(ctx, pl, pr) {
+    const s = worldToScreen(pl.x, pl.y);
+    ctx.save();
+    ctx.translate(s.x, s.y);
+    ctx.scale(pr, pr);
+
+    const bodyW = pl.w;
+    const bodyH = pl.h;
+    // shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+    ctx.beginPath();
+    ctx.ellipse(0, bodyH / 2 + 2, bodyW * 0.9, bodyH * 0.22, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // body
+    const bodyGrad = ctx.createLinearGradient(0, -bodyH / 2, 0, bodyH / 2);
+    bodyGrad.addColorStop(0, '#ffdca6');
+    bodyGrad.addColorStop(1, '#ffb86b');
+    ctx.fillStyle = bodyGrad;
+    roundRect(ctx, -bodyW / 2, -bodyH / 2, bodyW, bodyH, Math.min(bodyW, bodyH) / 6);
+    ctx.fill();
+    ctx.strokeStyle = '#4b2b18';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // head
+    const headR = Math.min(bodyW, bodyH) * 0.36;
+    ctx.beginPath();
+    ctx.fillStyle = '#fff2dc';
+    ctx.arc(0, -bodyH / 2 - headR * 0.2, headR, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // limb swing
+    const walk = Math.sin(player.walkTimer) * Math.min(1, Math.abs(player.vx) / player.speed);
+    // legs
+    ctx.strokeStyle = '#392417';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(-6, bodyH / 2 - 2);
+    ctx.lineTo(-6 + walk * 8, bodyH / 2 + 12);
+    ctx.moveTo(6, bodyH / 2 - 2);
+    ctx.lineTo(6 - walk * 8, bodyH / 2 + 12);
+    ctx.stroke();
+
+    // arms
+    ctx.beginPath();
+    ctx.moveTo(-bodyW / 2 + 4, -bodyH / 4);
+    ctx.lineTo(-bodyW / 2 + 4 + walk * 8, -bodyH / 4 + 8);
+    ctx.moveTo(bodyW / 2 - 4, -bodyH / 4);
+    ctx.lineTo(bodyW / 2 - 4 - walk * 8, -bodyH / 4 + 8);
+    ctx.stroke();
+
+    // eyes
+    ctx.fillStyle = '#2b2b2b';
+    ctx.beginPath();
+    ctx.arc(-headR * 0.35, -bodyH / 2 - headR * 0.2, headR * 0.12, 0, Math.PI * 2);
+    ctx.arc(headR * 0.05, -bodyH / 2 - headR * 0.2, headR * 0.12, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
   }
 
-  // Platformer game scene
-   function createGameScene() {
-     const player = {
-       x: 100,
-       y: 100,
-       w: 20,
-       h: 20,
-       vx: 0,
-       vy: 0,
-       speed: 150,
-       color: '#10b981',
-       onGround: false,
-       speedBoost: 1,
-       speedBoostTimer: 0
-     };
+  // draw a simple faceted crystal
+  function drawCrystal(ctx, x, y, r, hue, pixelRatio) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.shadowColor = `hsla(${hue},90%,60%,0.9)`;
+    ctx.shadowBlur = 14 * pixelRatio;
 
-     const GRAVITY = 600;
-     const JUMP_POWER = 300;
-     const MAX_FALL_SPEED = 400;
+    const rx = r;
+    const ry = r * 1.6;
+    ctx.beginPath();
+    ctx.moveTo(0, -ry);
+    ctx.lineTo(rx * 0.6, -ry * 0.2);
+    ctx.lineTo(rx, ry * 0.2);
+    ctx.lineTo(0, ry);
+    ctx.lineTo(-rx, ry * 0.2);
+    ctx.lineTo(-rx * 0.6, -ry * 0.2);
+    ctx.closePath();
 
-     let platforms = [];
-     let coins = [];
-     let crystals = [];
-     let score = 0;
+    const lg = ctx.createLinearGradient(0, -ry, 0, ry);
+    lg.addColorStop(0, `hsl(${hue} 85% 78%)`.replace(/\s/g, ''));
+    lg.addColorStop(0.45, `hsl(${hue} 85% 55%)`.replace(/\s/g, ''));
+    lg.addColorStop(1, `hsl(${hue} 85% 36%)`.replace(/\s/g, ''));
+    ctx.fillStyle = lg;
+    ctx.fill();
 
-     function enter() {
-       score = 0;
-       player.x = 100;
-       player.y = 100;
-       player.vx = 0;
-       player.vy = 0;
-       player.speedBoost = 1;
-       player.speedBoostTimer = 0;
-       
-       // Create platforms (x, y, width, height)
-       platforms = [
-         { x: 0, y: HEIGHT - 40, w: WIDTH, h: 40 },  // Ground
-         { x: 150, y: HEIGHT - 150, w: 200, h: 20 },
-         { x: 450, y: HEIGHT - 200, w: 220, h: 20 },
-         { x: 800, y: HEIGHT - 120, w: 200, h: 20 },
-         { x: 300, y: HEIGHT - 300, w: 180, h: 20 },
-         { x: 650, y: HEIGHT - 320, w: 200, h: 20 },
-         { x: 100, y: HEIGHT - 400, w: 220, h: 20 }
-       ];
+    // facets
+    ctx.shadowBlur = 0;
+    ctx.beginPath();
+    ctx.fillStyle = 'rgba(255,255,255,0.38)';
+    ctx.moveTo(0, -ry);
+    ctx.lineTo(rx * 0.5, -ry * 0.15);
+    ctx.lineTo(0, 0);
+    ctx.closePath();
+    ctx.fill();
 
-       coins = spawnCoins(12);
-       crystals = spawnCrystals(4);
-     }
+    ctx.beginPath();
+    ctx.fillStyle = 'rgba(255,255,255,0.12)';
+    ctx.moveTo(0, ry);
+    ctx.lineTo(rx, ry * 0.2);
+    ctx.lineTo(0, 0);
+    ctx.closePath();
+    ctx.fill();
 
-     function update(dt) {
-       // Horizontal movement
-       const ax = (input.keys.has('ArrowRight') || input.keys.has('d')) - (input.keys.has('ArrowLeft') || input.keys.has('a'));
-       player.vx = ax * player.speed * player.speedBoost;
+    ctx.strokeStyle = `hsla(${hue},60%,20%,0.8)`;
+    ctx.lineWidth = Math.max(1, 1 * pixelRatio);
+    ctx.stroke();
+    ctx.restore();
+  }
 
-       // Gravity
-       player.vy += GRAVITY * dt;
-       player.vy = Math.min(player.vy, MAX_FALL_SPEED);
+  // draw coin
+  function drawCoin(ctx, x, y, r, pixelRatio) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.shadowColor = 'rgba(0,0,0,0.35)';
+    ctx.shadowBlur = 6 * pixelRatio;
 
-       // Update position
-       player.x += player.vx * dt;
-       player.y += player.vy * dt;
+    // rim
+    const grad = ctx.createLinearGradient(-r, -r, r, r);
+    grad.addColorStop(0, '#ffd880');
+    grad.addColorStop(0.5, '#ffcf40');
+    grad.addColorStop(1, '#cca000');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(0, 0, r, 0, Math.PI * 2);
+    ctx.fill();
 
-       // Horizontal bounds
-       player.x = Math.max(0, Math.min(WIDTH - player.w, player.x));
+    // inner shine
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.beginPath();
+    ctx.ellipse(-r * 0.25, -r * 0.25, r * 0.5, r * 0.35, 0, 0, Math.PI * 2);
+    ctx.fill();
 
-       // Check ground collision
-       player.onGround = false;
-       for (const p of platforms) {
-         if (rectsOverlap(player, p)) {
-           if (player.vy > 0 && player.y + player.h - player.vy * dt <= p.y + 5) {
-             player.y = p.y - player.h;
-             player.vy = 0;
-             player.onGround = true;
-           }
-         }
-       }
+    // edge stroke
+    ctx.strokeStyle = 'rgba(0,0,0,0.12)';
+    ctx.lineWidth = 1 * pixelRatio;
+    ctx.stroke();
+    ctx.restore();
+  }
 
-       // Jump
-       if ((input.keys.has(' ') || input.keys.has('w') || input.keys.has('ArrowUp')) && player.onGround) {
-         player.vy = -JUMP_POWER;
-       }
+  // rounded rectangle path
+  function roundRect(ctx, x, y, w, h, r) {
+    const rr = Math.min(r, Math.abs(w / 2), Math.abs(h / 2));
+    ctx.beginPath();
+    ctx.moveTo(x + rr, y);
+    ctx.arcTo(x + w, y, x + w, y + h, rr);
+    ctx.arcTo(x + w, y + h, x, y + h, rr);
+    ctx.arcTo(x, y + h, x, y, rr);
+    ctx.arcTo(x, y, x + w, y, rr);
+    ctx.closePath();
+  }
 
-       // Collect coins
-       for (let i = coins.length - 1; i >= 0; i--) {
-         if (rectsOverlap(player, coins[i])) {
-           coins.splice(i, 1);
-           score += 10;
-         }
-       }
-
-       // Collect crystals (speed boost)
-       for (let i = crystals.length - 1; i >= 0; i--) {
-         if (rectsOverlap(player, crystals[i])) {
-           crystals.splice(i, 1);
-           player.speedBoost = 2;
-           player.speedBoostTimer = 5;
-         }
-       }
-
-       // Speed boost timer
-       if (player.speedBoostTimer > 0) {
-         player.speedBoostTimer -= dt;
-       } else {
-         player.speedBoost = 1;
-       }
-
-       // Fall off screen
-       if (player.y > HEIGHT) {
-         setScene('menu');
-       }
-
-       if (input.keys.has('Escape')) setScene('pause');
-       if (coins.length === 0 && crystals.length === 0) setScene('menu');
-     }
-
-     function draw() {
-       ctx.setTransform(1, 0, 0, 1, 0, 0);
-       
-       // Greenish background
-       ctx.fillStyle = '#2d5a3d';
-       ctx.fillRect(0, 0, WIDTH, HEIGHT);
-       
-       // Lighter green overlay gradient effect
-       const gradient = ctx.createLinearGradient(0, 0, 0, HEIGHT);
-       gradient.addColorStop(0, '#4a7c59');
-       gradient.addColorStop(1, '#1f3a28');
-       ctx.fillStyle = gradient;
-       ctx.fillRect(0, 0, WIDTH, HEIGHT);
-
-       // Draw platforms (brown bridges)
-       ctx.fillStyle = '#8b6f47';
-       for (const p of platforms) {
-         ctx.fillRect(p.x, p.y, p.w, p.h);
-         // Platform shadow
-         ctx.fillStyle = '#6b5238';
-         ctx.fillRect(p.x, p.y + p.h, p.w, 3);
-         ctx.fillStyle = '#8b6f47';
-       }
-
-       // Draw coins (yellow circles)
-       for (const c of coins) {
-         ctx.fillStyle = '#fbbf24';
-         ctx.beginPath();
-         ctx.arc(c.x + c.w / 2, c.y + c.h / 2, c.w / 2, 0, Math.PI * 2);
-         ctx.fill();
-         // Coin shine
-         ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-         ctx.beginPath();
-         ctx.arc(c.x + c.w / 2 - 2, c.y + c.h / 2 - 2, c.w / 4, 0, Math.PI * 2);
-         ctx.fill();
-       }
-
-       // Draw crystals (cyan/turquoise diamonds)
-       for (const cr of crystals) {
-         ctx.fillStyle = '#06b6d4';
-         ctx.beginPath();
-         ctx.moveTo(cr.x + cr.w / 2, cr.y); // top
-         ctx.lineTo(cr.x + cr.w, cr.y + cr.h / 2); // right
-         ctx.lineTo(cr.x + cr.w / 2, cr.y + cr.h); // bottom
-         ctx.lineTo(cr.x, cr.y + cr.h / 2); // left
-         ctx.closePath();
-         ctx.fill();
-         // Crystal glow
-         ctx.strokeStyle = '#0891b2';
-         ctx.lineWidth = 2;
-         ctx.stroke();
-       }
-
-       // Player
-       ctx.fillStyle = player.speedBoostTimer > 0 ? '#ff6b6b' : '#10b981';
-       ctx.fillRect(player.x, player.y, player.w, player.h);
-       // Player eyes
-       ctx.fillStyle = '#000';
-       ctx.fillRect(player.x + 5, player.y + 5, 3, 3);
-       ctx.fillRect(player.x + 12, player.y + 5, 3, 3);
-
-       // HUD
-       drawText(`Score: ${score}`, 12, 24, 16, '#e2e8f0', 'left');
-       if (player.speedBoostTimer > 0) {
-         drawText(`SPEED BOOST! ${player.speedBoostTimer.toFixed(1)}s`, WIDTH / 2, 24, 14, '#ff6b6b', 'center');
-       }
-       drawText('ARROW KEYS / WASD to move, SPACE/W to jump', WIDTH / 2, HEIGHT - 20, 12, '#b0c4de', 'center');
-     }
-
-     return { enter, update, draw, exit() {} };
-   }
-
-   // Helpers
-   function rectsOverlap(a, b) {
-     return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
-   }
-   function spawnCoins(n) {
-     const arr = [];
-     for (let i = 0; i < n; i++) {
-       arr.push({ x: Math.random() * (WIDTH - 16), y: Math.random() * (HEIGHT - 100), w: 10, h: 10 });
-     }
-     return arr;
-   }
-   function spawnCrystals(n) {
-     const arr = [];
-     for (let i = 0; i < n; i++) {
-       arr.push({ x: Math.random() * (WIDTH - 20), y: Math.random() * (HEIGHT - 150), w: 16, h: 16 });
-     }
-     return arr;
-   }
- });
+  // expose for debugging
+  window.game = { player, platforms, crystals, coins, spawn: _spawnPickups };
+})();
