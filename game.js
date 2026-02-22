@@ -278,11 +278,9 @@
   }
 
   // drawPlayer: simple human with swinging limbs
-  function drawPlayer(ctx, pl, pr) {
-    const s = worldToScreen(pl.x, pl.y);
+  function drawPlayer(ctx, pl) {
     ctx.save();
-    ctx.translate(s.x, s.y);
-    ctx.scale(pr, pr);
+    ctx.translate(pl.x, pl.y);
 
     const bodyW = pl.w;
     const bodyH = pl.h;
@@ -360,9 +358,9 @@
     ctx.closePath();
 
     const lg = ctx.createLinearGradient(0, -ry, 0, ry);
-    lg.addColorStop(0, `hsl(${hue} 85% 78%)`.replace(/\s/g, ''));
-    lg.addColorStop(0.45, `hsl(${hue} 85% 55%)`.replace(/\s/g, ''));
-    lg.addColorStop(1, `hsl(${hue} 85% 36%)`.replace(/\s/g, ''));
+    lg.addColorStop(0, `hsl(${hue},85%,78%)`);
+    lg.addColorStop(0.45, `hsl(${hue},85%,55%)`);
+    lg.addColorStop(1, `hsl(${hue},85%,36%)`);
     ctx.fillStyle = lg;
     ctx.fill();
 
