@@ -46,7 +46,7 @@
   const platforms = [];
   const crystals = [];
   const coins = [];
-  const levelEndX = 3200; // winning x position
+  const levelEndX = 9300; // winning x position (end of last bridge)
 
   let score = 0;
   let coinsCollected = 0;
@@ -69,13 +69,13 @@
   function _spawnPlatforms() {
     platforms.length = 0;
     // NO GROUND PLATFORM - falling to groundY means instant reset!
-    // Bridge platforms spread across the page horizontally
-    platforms.push({ x: 600, y: groundY - 120, w: 280, h: 16 });   // Start bridge
-    platforms.push({ x: 1050, y: groundY - 180, w: 320, h: 16 });  // Second bridge
-    platforms.push({ x: 1520, y: groundY - 140, w: 280, h: 16 });  // Third bridge
-    platforms.push({ x: 1950, y: groundY - 220, w: 300, h: 16 });  // Fourth bridge
-    platforms.push({ x: 2450, y: groundY - 160, w: 320, h: 16 });  // Fifth bridge
-    platforms.push({ x: 2950, y: groundY - 240, w: 280, h: 16 });  // Final bridge to win
+    // Bridge platforms span across the whole scene horizontally
+    platforms.push({ x: 600, y: groundY - 120, w: 1200, h: 16 });   // Start bridge - spans across
+    platforms.push({ x: 1800, y: groundY - 180, w: 1300, h: 16 });  // Second bridge - spans across
+    platforms.push({ x: 3200, y: groundY - 140, w: 1400, h: 16 });  // Third bridge - spans across
+    platforms.push({ x: 4800, y: groundY - 220, w: 1200, h: 16 });  // Fourth bridge - spans across
+    platforms.push({ x: 6300, y: groundY - 160, w: 1300, h: 16 });  // Fifth bridge - spans across
+    platforms.push({ x: 7900, y: groundY - 240, w: 1400, h: 16 });  // Final bridge to win - spans across
   }
 
   function _spawnPickups(nCrystals = 12, nCoins = 8) {
@@ -277,64 +277,107 @@
     ctx.restore();
   }
 
-  // drawPlayer: simple human with swinging limbs
+  // drawPlayer: more realistic human character with better proportions
   function drawPlayer(ctx, pl) {
+    const s = worldToScreen(pl.x, pl.y);
     ctx.save();
-    ctx.translate(pl.x, pl.y);
+    ctx.translate(s.x, s.y);
+    ctx.scale(pixelRatio, pixelRatio);
 
     const bodyW = pl.w;
     const bodyH = pl.h;
+
     // shadow
-    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
     ctx.beginPath();
-    ctx.ellipse(0, bodyH / 2 + 2, bodyW * 0.9, bodyH * 0.22, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, bodyH / 2 + 4, bodyW * 0.95, bodyH * 0.25, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // body
-    const bodyGrad = ctx.createLinearGradient(0, -bodyH / 2, 0, bodyH / 2);
-    bodyGrad.addColorStop(0, '#ffdca6');
-    bodyGrad.addColorStop(1, '#ffb86b');
-    ctx.fillStyle = bodyGrad;
-    roundRect(ctx, -bodyW / 2, -bodyH / 2, bodyW, bodyH, Math.min(bodyW, bodyH) / 6);
+    // Head
+    const headR = bodyW * 0.45;
+    ctx.fillStyle = '#f4a460';
+    ctx.beginPath();
+    ctx.arc(0, -bodyH * 0.35, headR, 0, Math.PI * 2);
     ctx.fill();
-    ctx.strokeStyle = '#4b2b18';
+    ctx.strokeStyle = '#8b6914';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Hair
+    ctx.fillStyle = '#3d2817';
+    ctx.beginPath();
+    ctx.arc(0, -bodyH * 0.35, headR, 0, Math.PI);
+    ctx.fill();
+
+    // Torso/Shirt
+    const shirtGrad = ctx.createLinearGradient(-bodyW / 2, -bodyH * 0.15, bodyW / 2, bodyH * 0.25);
+    shirtGrad.addColorStop(0, '#e74c3c');
+    shirtGrad.addColorStop(1, '#c0392b');
+    ctx.fillStyle = shirtGrad;
+    roundRect(ctx, -bodyW * 0.5, -bodyH * 0.15, bodyW, bodyH * 0.5, 3);
+    ctx.fill();
+    ctx.strokeStyle = '#8b2e23';
     ctx.lineWidth = 1.5;
     ctx.stroke();
 
-    // head
-    const headR = Math.min(bodyW, bodyH) * 0.36;
+    // Pants
+    const pantsGrad = ctx.createLinearGradient(-bodyW / 2, bodyH * 0.35, bodyW / 2, bodyH / 2);
+    pantsGrad.addColorStop(0, '#2c3e50');
+    pantsGrad.addColorStop(1, '#1a2634');
+    ctx.fillStyle = pantsGrad;
+    ctx.fillRect(-bodyW * 0.4, bodyH * 0.35, bodyW * 0.8, bodyH * 0.25);
+
+    // Left arm
+    ctx.strokeStyle = '#f4a460';
+    ctx.lineWidth = bodyW * 0.25;
+    ctx.lineCap = 'round';
     ctx.beginPath();
-    ctx.fillStyle = '#fff2dc';
-    ctx.arc(0, -bodyH / 2 - headR * 0.2, headR, 0, Math.PI * 2);
+    const leftSwing = Math.sin(player.walkTimer) * 0.3 * Math.min(1, Math.abs(player.vx) / player.speed);
+    ctx.moveTo(-bodyW * 0.35, -bodyH * 0.05);
+    ctx.lineTo(-bodyW * 0.6 + leftSwing * 6, bodyH * 0.2);
+    ctx.stroke();
+
+    // Right arm
+    ctx.beginPath();
+    const rightSwing = Math.sin(player.walkTimer + Math.PI) * 0.3 * Math.min(1, Math.abs(player.vx) / player.speed);
+    ctx.moveTo(bodyW * 0.35, -bodyH * 0.05);
+    ctx.lineTo(bodyW * 0.6 + rightSwing * 6, bodyH * 0.2);
+    ctx.stroke();
+
+    // Left leg
+    ctx.beginPath();
+    const leftLegSwing = Math.sin(player.walkTimer) * 12 * Math.min(1, Math.abs(player.vx) / player.speed);
+    ctx.moveTo(-bodyW * 0.2, bodyH * 0.6);
+    ctx.lineTo(-bodyW * 0.15 + leftLegSwing, bodyH * 0.95);
+    ctx.stroke();
+
+    // Right leg
+    ctx.beginPath();
+    const rightLegSwing = Math.sin(player.walkTimer + Math.PI) * 12 * Math.min(1, Math.abs(player.vx) / player.speed);
+    ctx.moveTo(bodyW * 0.2, bodyH * 0.6);
+    ctx.lineTo(bodyW * 0.15 + rightLegSwing, bodyH * 0.95);
+    ctx.stroke();
+
+    // Eyes
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(-headR * 0.25, -bodyH * 0.38, headR * 0.15, 0, Math.PI * 2);
+    ctx.arc(headR * 0.25, -bodyH * 0.38, headR * 0.15, 0, Math.PI * 2);
     ctx.fill();
-    ctx.stroke();
 
-    // limb swing
-    const walk = Math.sin(player.walkTimer) * Math.min(1, Math.abs(player.vx) / player.speed);
-    // legs
-    ctx.strokeStyle = '#392417';
-    ctx.lineWidth = 2;
+    // Pupils
+    ctx.fillStyle = '#000';
     ctx.beginPath();
-    ctx.moveTo(-6, bodyH / 2 - 2);
-    ctx.lineTo(-6 + walk * 8, bodyH / 2 + 12);
-    ctx.moveTo(6, bodyH / 2 - 2);
-    ctx.lineTo(6 - walk * 8, bodyH / 2 + 12);
-    ctx.stroke();
-
-    // arms
-    ctx.beginPath();
-    ctx.moveTo(-bodyW / 2 + 4, -bodyH / 4);
-    ctx.lineTo(-bodyW / 2 + 4 + walk * 8, -bodyH / 4 + 8);
-    ctx.moveTo(bodyW / 2 - 4, -bodyH / 4);
-    ctx.lineTo(bodyW / 2 - 4 - walk * 8, -bodyH / 4 + 8);
-    ctx.stroke();
-
-    // eyes
-    ctx.fillStyle = '#2b2b2b';
-    ctx.beginPath();
-    ctx.arc(-headR * 0.35, -bodyH / 2 - headR * 0.2, headR * 0.12, 0, Math.PI * 2);
-    ctx.arc(headR * 0.05, -bodyH / 2 - headR * 0.2, headR * 0.12, 0, Math.PI * 2);
+    ctx.arc(-headR * 0.25, -bodyH * 0.38, headR * 0.08, 0, Math.PI * 2);
+    ctx.arc(headR * 0.25, -bodyH * 0.38, headR * 0.08, 0, Math.PI * 2);
     ctx.fill();
+
+    // Mouth
+    ctx.strokeStyle = '#8b4513';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(0, -bodyH * 0.3, headR * 0.15, 0, Math.PI);
+    ctx.stroke();
 
     ctx.restore();
   }
