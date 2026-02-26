@@ -46,7 +46,11 @@
   const platforms = [];
   const crystals = [];
   const coins = [];
-  const levelEndX = 9300; // winning x position (end of last bridge)
+  
+  // World dimensions - all visible on screen
+  const worldWidth = width;
+  const worldHeight = height;
+  const levelEndX = worldWidth - 100; // winning x position (right side of screen)
 
   let score = 0;
   let coinsCollected = 0;
@@ -54,7 +58,7 @@
   let justReset = false;
 
   function _resetGame() {
-    player.x = 400;
+    player.x = 80;
     player.y = 300;
     player.vx = 0;
     player.vy = 0;
@@ -69,13 +73,15 @@
   function _spawnPlatforms() {
     platforms.length = 0;
     // NO GROUND PLATFORM - falling to groundY means instant reset!
-    // Bridge platforms span across the whole scene horizontally
-    platforms.push({ x: 600, y: groundY - 120, w: 1200, h: 16 });   // Start bridge - spans across
-    platforms.push({ x: 1800, y: groundY - 180, w: 1300, h: 16 });  // Second bridge - spans across
-    platforms.push({ x: 3200, y: groundY - 140, w: 1400, h: 16 });  // Third bridge - spans across
-    platforms.push({ x: 4800, y: groundY - 220, w: 1200, h: 16 });  // Fourth bridge - spans across
-    platforms.push({ x: 6300, y: groundY - 160, w: 1300, h: 16 });  // Fifth bridge - spans across
-    platforms.push({ x: 7900, y: groundY - 240, w: 1400, h: 16 });  // Final bridge to win - spans across
+    // Bridge platforms spread evenly across the fixed screen
+    const bridgeHeight = 16;
+    const screenMargin = 50;
+    platforms.push({ x: screenMargin + 100, y: groundY - 120, w: 150, h: bridgeHeight });   // Start bridge
+    platforms.push({ x: screenMargin + 300, y: groundY - 180, w: 140, h: bridgeHeight });   // Second bridge
+    platforms.push({ x: screenMargin + 500, y: groundY - 140, w: 160, h: bridgeHeight });   // Third bridge
+    platforms.push({ x: screenMargin + 700, y: groundY - 220, w: 140, h: bridgeHeight });   // Fourth bridge
+    platforms.push({ x: screenMargin + 900, y: groundY - 160, w: 150, h: bridgeHeight });   // Fifth bridge
+    platforms.push({ x: screenMargin + 1100, y: groundY - 240, w: 160, h: bridgeHeight });  // Final bridge to win
   }
 
   function _spawnPickups(nCrystals = 12, nCoins = 8) {
@@ -169,6 +175,10 @@
       }
     }
 
+    // Limit player movement to screen bounds
+    if (player.x < 0) player.x = 0;
+    if (player.x > width - player.w) player.x = width - player.w;
+
     // CHECK IF TOUCHED GROUND - INSTANT RESET!
     if (player.y + halfH > groundY) {
       _resetGame();
@@ -225,14 +235,11 @@
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // camera
-    const camX = player.x - width / 2;
-    const camY = player.y - height / 2;
-
-    // draw platforms
+    // NO CAMERA - Fixed screen view
     ctx.save();
     ctx.scale(pixelRatio, pixelRatio);
-    ctx.translate(-camX, -camY);
+    
+    // draw platforms
     for (const p of platforms) {
       ctx.fillStyle = '#6b4b2b';
       ctx.fillRect(p.x - p.w / 2, p.y - p.h, p.w, p.h);
@@ -241,16 +248,17 @@
     }
 
     // draw crystals
-    for (const c of crystals) drawCrystal(ctx, c.x, c.y, c.r, c.hue, pixelRatio);
+    for (const c of crystals) drawCrystal(ctx, c.x, c.y, c.r, c.hue);
 
     // draw coins
-    for (const c of coins) drawCoin(ctx, c.x, c.y, c.r, pixelRatio);
+    for (const c of coins) drawCoin(ctx, c.x, c.y, c.r);
 
-    // draw player (human-ish) with simple limbs animation
-    drawPlayer(ctx, player, pixelRatio);
+    // draw player
+    drawPlayer(ctx, player);
 
-    // HUD
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.restore();
+
+    // HUD (fixed to screen, not affected by scaling)
     ctx.fillStyle = 'rgba(0,0,0,0.6)';
     ctx.fillRect(8 * pixelRatio, 8 * pixelRatio, 180 * pixelRatio, 40 * pixelRatio);
     ctx.fillStyle = '#fff';
@@ -261,7 +269,6 @@
 
     // Draw WIN message
     if (gameWon) {
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.fillStyle = 'rgba(0,0,0,0.7)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = '#00ff00';
@@ -273,15 +280,12 @@
       ctx.font = `${32 * pixelRatio}px Arial`;
       ctx.fillText(`Final Score: ${score}`, canvas.width / 2, canvas.height / 2 + 60 * pixelRatio);
     }
-
-    ctx.restore();
   }
 
   // drawPlayer: more realistic human character with better proportions
   function drawPlayer(ctx, pl) {
-    const s = worldToScreen(pl.x, pl.y);
     ctx.save();
-    ctx.translate(s.x, s.y);
+    ctx.translate(pl.x * pixelRatio, pl.y * pixelRatio);
     ctx.scale(pixelRatio, pixelRatio);
 
     const bodyW = pl.w;
@@ -383,11 +387,11 @@
   }
 
   // draw a simple faceted crystal
-  function drawCrystal(ctx, x, y, r, hue, pixelRatio) {
+  function drawCrystal(ctx, x, y, r, hue) {
     ctx.save();
-    ctx.translate(x, y);
+    ctx.translate(x * pixelRatio, y * pixelRatio);
     ctx.shadowColor = `hsla(${hue},90%,60%,0.9)`;
-    ctx.shadowBlur = 14 * pixelRatio;
+    ctx.shadowBlur = 14;
 
     const rx = r;
     const ry = r * 1.6;
@@ -426,17 +430,17 @@
     ctx.fill();
 
     ctx.strokeStyle = `hsla(${hue},60%,20%,0.8)`;
-    ctx.lineWidth = Math.max(1, 1 * pixelRatio);
+    ctx.lineWidth = Math.max(1, 1);
     ctx.stroke();
     ctx.restore();
   }
 
   // draw coin
-  function drawCoin(ctx, x, y, r, pixelRatio) {
+  function drawCoin(ctx, x, y, r) {
     ctx.save();
-    ctx.translate(x, y);
+    ctx.translate(x * pixelRatio, y * pixelRatio);
     ctx.shadowColor = 'rgba(0,0,0,0.35)';
-    ctx.shadowBlur = 6 * pixelRatio;
+    ctx.shadowBlur = 6;
 
     // rim
     const grad = ctx.createLinearGradient(-r, -r, r, r);
@@ -456,7 +460,7 @@
 
     // edge stroke
     ctx.strokeStyle = 'rgba(0,0,0,0.12)';
-    ctx.lineWidth = 1 * pixelRatio;
+    ctx.lineWidth = 1;
     ctx.stroke();
     ctx.restore();
   }
