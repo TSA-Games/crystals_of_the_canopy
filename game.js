@@ -28,10 +28,10 @@
 
   // World
   const player = {
-    x: 400,
+    x: 40,
     y: 300,
-    w: 28,
-    h: 40,
+    w: 24,
+    h: 32,
     vx: 0,
     vy: 0,
     speed: 260,
@@ -58,7 +58,7 @@
   let justReset = false;
 
   function _resetGame() {
-    player.x = 80;
+    player.x = 40;
     player.y = 300;
     player.vx = 0;
     player.vy = 0;
@@ -73,15 +73,32 @@
   function _spawnPlatforms() {
     platforms.length = 0;
     // NO GROUND PLATFORM - falling to groundY means instant reset!
-    // Bridge platforms spread evenly across the fixed screen
+    // Bridge platforms span across entire screen width with proper collision
     const bridgeHeight = 16;
-    const screenMargin = 50;
-    platforms.push({ x: screenMargin + 100, y: groundY - 120, w: 150, h: bridgeHeight });   // Start bridge
-    platforms.push({ x: screenMargin + 300, y: groundY - 180, w: 140, h: bridgeHeight });   // Second bridge
-    platforms.push({ x: screenMargin + 500, y: groundY - 140, w: 160, h: bridgeHeight });   // Third bridge
-    platforms.push({ x: screenMargin + 700, y: groundY - 220, w: 140, h: bridgeHeight });   // Fourth bridge
-    platforms.push({ x: screenMargin + 900, y: groundY - 160, w: 150, h: bridgeHeight });   // Fifth bridge
-    platforms.push({ x: screenMargin + 1100, y: groundY - 240, w: 160, h: bridgeHeight });  // Final bridge to win
+    
+    // Each bridge spans approximately width/5 with some overlap for safety
+    const bridgeWidth = 180;
+    const verticalSpacing = 50;
+    let startX = 30;
+    let currentY = 400;
+    
+    // Create bridges that span across the screen
+    platforms.push({ x: startX + 90, y: currentY, w: bridgeWidth, h: bridgeHeight });
+    currentY -= verticalSpacing;
+    
+    platforms.push({ x: startX + 270, y: currentY, w: bridgeWidth, h: bridgeHeight });
+    currentY -= verticalSpacing;
+    
+    platforms.push({ x: startX + 450, y: currentY, w: bridgeWidth, h: bridgeHeight });
+    currentY -= verticalSpacing;
+    
+    platforms.push({ x: startX + 630, y: currentY, w: bridgeWidth, h: bridgeHeight });
+    currentY -= verticalSpacing;
+    
+    platforms.push({ x: startX + 810, y: currentY, w: bridgeWidth, h: bridgeHeight });
+    currentY -= verticalSpacing;
+    
+    platforms.push({ x: startX + 990, y: currentY, w: bridgeWidth, h: bridgeHeight });
   }
 
   function _spawnPickups(nCrystals = 12, nCoins = 8) {
@@ -155,20 +172,27 @@
 
     // platform collisions
     player.onGround = false;
+    const halfW = player.w / 2;
     const halfH = player.h / 2;
+    
     for (const p of platforms) {
-      const top = p.y - p.h; // since platform stored with y as bottom for convenience
-      // We'll treat p.y as the top of platform (we stored top earlier), but to be robust accept either
-      const platTop = p.y - p.h >= 0 ? p.y - p.h : p.y; // fallback
+      // Platform bounds: center at p.x, width p.w, top at p.y
       const platLeft = p.x - p.w / 2;
       const platRight = p.x + p.w / 2;
-      // treat platform as rectangle at (p.x - p.w/2, p.y - p.h) width p.w height p.h
-      const px = p.x - p.w / 2;
-      const py = p.y - p.h;
-      if (player.x + player.w / 2 > px && player.x - player.w / 2 < px + p.w) {
-        // was above and now below or touching
-        if (prevY + halfH <= py && player.y + halfH >= py) {
-          player.y = py - halfH;
+      const platTop = p.y;
+      const platBottom = p.y + p.h;
+      
+      // Player bounds
+      const playerLeft = player.x;
+      const playerRight = player.x + player.w;
+      const playerTop = player.y;
+      const playerBottom = player.y + player.h;
+      
+      // Check if player is horizontally within platform bounds
+      if (playerRight > platLeft && playerLeft < platRight) {
+        // Check if player landed on top (was above, now at or below top)
+        if (prevY + player.h <= platTop && playerBottom >= platTop && player.vy >= 0) {
+          player.y = platTop - player.h;
           player.vy = 0;
           player.onGround = true;
         }
@@ -282,7 +306,7 @@
     }
   }
 
-  // drawPlayer: more realistic human character with better proportions
+  // drawPlayer: Kid character - larger head, shorter body, cute style
   function drawPlayer(ctx, pl) {
     ctx.save();
     ctx.translate(pl.x * pixelRatio, pl.y * pixelRatio);
@@ -292,96 +316,110 @@
     const bodyH = pl.h;
 
     // shadow
-    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.fillStyle = 'rgba(0,0,0,0.2)';
     ctx.beginPath();
-    ctx.ellipse(0, bodyH / 2 + 4, bodyW * 0.95, bodyH * 0.25, 0, 0, Math.PI * 2);
+    ctx.ellipse(bodyW / 2, bodyH + 2, bodyW * 0.6, bodyH * 0.15, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // Head
-    const headR = bodyW * 0.45;
-    ctx.fillStyle = '#f4a460';
+    // Head (larger for kid proportions)
+    const headR = bodyW * 0.55;
+    ctx.fillStyle = '#ffcc99';
     ctx.beginPath();
-    ctx.arc(0, -bodyH * 0.35, headR, 0, Math.PI * 2);
+    ctx.arc(bodyW / 2, bodyH * 0.1, headR, 0, Math.PI * 2);
     ctx.fill();
-    ctx.strokeStyle = '#8b6914';
-    ctx.lineWidth = 1;
+    ctx.strokeStyle = '#cc9966';
+    ctx.lineWidth = 0.5;
     ctx.stroke();
 
-    // Hair
-    ctx.fillStyle = '#3d2817';
+    // Blonde/Brown Hair
+    ctx.fillStyle = '#d4a574';
     ctx.beginPath();
-    ctx.arc(0, -bodyH * 0.35, headR, 0, Math.PI);
+    ctx.arc(bodyW / 2, bodyH * 0.1, headR, 0, Math.PI);
+    ctx.fill();
+    // Hair tuft on sides
+    ctx.beginPath();
+    ctx.arc(bodyW / 2 - headR * 0.4, bodyH * 0.05, headR * 0.35, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(bodyW / 2 + headR * 0.4, bodyH * 0.05, headR * 0.35, 0, Math.PI * 2);
     ctx.fill();
 
-    // Torso/Shirt
-    const shirtGrad = ctx.createLinearGradient(-bodyW / 2, -bodyH * 0.15, bodyW / 2, bodyH * 0.25);
-    shirtGrad.addColorStop(0, '#e74c3c');
-    shirtGrad.addColorStop(1, '#c0392b');
-    ctx.fillStyle = shirtGrad;
-    roundRect(ctx, -bodyW * 0.5, -bodyH * 0.15, bodyW, bodyH * 0.5, 3);
-    ctx.fill();
-    ctx.strokeStyle = '#8b2e23';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-
-    // Pants
-    const pantsGrad = ctx.createLinearGradient(-bodyW / 2, bodyH * 0.35, bodyW / 2, bodyH / 2);
-    pantsGrad.addColorStop(0, '#2c3e50');
-    pantsGrad.addColorStop(1, '#1a2634');
-    ctx.fillStyle = pantsGrad;
-    ctx.fillRect(-bodyW * 0.4, bodyH * 0.35, bodyW * 0.8, bodyH * 0.25);
-
-    // Left arm
-    ctx.strokeStyle = '#f4a460';
-    ctx.lineWidth = bodyW * 0.25;
-    ctx.lineCap = 'round';
-    ctx.beginPath();
-    const leftSwing = Math.sin(player.walkTimer) * 0.3 * Math.min(1, Math.abs(player.vx) / player.speed);
-    ctx.moveTo(-bodyW * 0.35, -bodyH * 0.05);
-    ctx.lineTo(-bodyW * 0.6 + leftSwing * 6, bodyH * 0.2);
-    ctx.stroke();
-
-    // Right arm
-    ctx.beginPath();
-    const rightSwing = Math.sin(player.walkTimer + Math.PI) * 0.3 * Math.min(1, Math.abs(player.vx) / player.speed);
-    ctx.moveTo(bodyW * 0.35, -bodyH * 0.05);
-    ctx.lineTo(bodyW * 0.6 + rightSwing * 6, bodyH * 0.2);
-    ctx.stroke();
-
-    // Left leg
-    ctx.beginPath();
-    const leftLegSwing = Math.sin(player.walkTimer) * 12 * Math.min(1, Math.abs(player.vx) / player.speed);
-    ctx.moveTo(-bodyW * 0.2, bodyH * 0.6);
-    ctx.lineTo(-bodyW * 0.15 + leftLegSwing, bodyH * 0.95);
-    ctx.stroke();
-
-    // Right leg
-    ctx.beginPath();
-    const rightLegSwing = Math.sin(player.walkTimer + Math.PI) * 12 * Math.min(1, Math.abs(player.vx) / player.speed);
-    ctx.moveTo(bodyW * 0.2, bodyH * 0.6);
-    ctx.lineTo(bodyW * 0.15 + rightLegSwing, bodyH * 0.95);
-    ctx.stroke();
-
-    // Eyes
+    // Big cute eyes
     ctx.fillStyle = '#fff';
     ctx.beginPath();
-    ctx.arc(-headR * 0.25, -bodyH * 0.38, headR * 0.15, 0, Math.PI * 2);
-    ctx.arc(headR * 0.25, -bodyH * 0.38, headR * 0.15, 0, Math.PI * 2);
+    ctx.arc(bodyW / 2 - headR * 0.25, bodyH * 0.05, headR * 0.18, 0, Math.PI * 2);
+    ctx.arc(bodyW / 2 + headR * 0.25, bodyH * 0.05, headR * 0.18, 0, Math.PI * 2);
     ctx.fill();
 
-    // Pupils
-    ctx.fillStyle = '#000';
+    // Pupils (big and expressive for kid)
+    ctx.fillStyle = '#1a1a1a';
     ctx.beginPath();
-    ctx.arc(-headR * 0.25, -bodyH * 0.38, headR * 0.08, 0, Math.PI * 2);
-    ctx.arc(headR * 0.25, -bodyH * 0.38, headR * 0.08, 0, Math.PI * 2);
+    ctx.arc(bodyW / 2 - headR * 0.25, bodyH * 0.05, headR * 0.1, 0, Math.PI * 2);
+    ctx.arc(bodyW / 2 + headR * 0.25, bodyH * 0.05, headR * 0.1, 0, Math.PI * 2);
     ctx.fill();
 
-    // Mouth
-    ctx.strokeStyle = '#8b4513';
+    // Blush marks
+    ctx.fillStyle = 'rgba(255, 170, 170, 0.5)';
+    ctx.beginPath();
+    ctx.arc(bodyW / 2 - headR * 0.45, bodyH * 0.15, headR * 0.15, 0, Math.PI * 2);
+    ctx.arc(bodyW / 2 + headR * 0.45, bodyH * 0.15, headR * 0.15, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Cute smile
+    ctx.strokeStyle = '#cc6666';
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.arc(0, -bodyH * 0.3, headR * 0.15, 0, Math.PI);
+    ctx.arc(bodyW / 2, bodyH * 0.25, headR * 0.12, 0, Math.PI);
     ctx.stroke();
+
+    // Body/Shirt (shorter proportions for kid)
+    ctx.fillStyle = '#ff6b9d';
+    roundRect(ctx, bodyW * 0.1, bodyH * 0.5, bodyW * 0.8, bodyH * 0.35, 2);
+    ctx.fill();
+    ctx.strokeStyle = '#e63384';
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
+
+    // Shorts
+    ctx.fillStyle = '#4a90e2';
+    ctx.fillRect(bodyW * 0.15, bodyH * 0.8, bodyW * 0.7, bodyH * 0.15);
+
+    // Arms with animation
+    ctx.strokeStyle = '#ffcc99';
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    const armSwing = Math.sin(player.walkTimer) * 8 * Math.min(1, Math.abs(player.vx) / player.speed);
+    
+    ctx.beginPath();
+    ctx.moveTo(bodyW * 0.15, bodyH * 0.6);
+    ctx.lineTo(bodyW * 0.05 + armSwing, bodyH * 0.65);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(bodyW * 0.85, bodyH * 0.6);
+    ctx.lineTo(bodyW * 0.95 - armSwing, bodyH * 0.65);
+    ctx.stroke();
+
+    // Legs with animation
+    ctx.lineWidth = 2.5;
+    const legSwing = Math.sin(player.walkTimer) * 6 * Math.min(1, Math.abs(player.vx) / player.speed);
+    
+    ctx.beginPath();
+    ctx.moveTo(bodyW * 0.3, bodyH * 0.95);
+    ctx.lineTo(bodyW * 0.3 + legSwing, bodyH * 1.15);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(bodyW * 0.7, bodyH * 0.95);
+    ctx.lineTo(bodyW * 0.7 - legSwing, bodyH * 1.15);
+    ctx.stroke();
+
+    // Shoes
+    ctx.fillStyle = '#666';
+    ctx.beginPath();
+    ctx.ellipse(bodyW * 0.3, bodyH * 1.15, 3, 2, 0, 0, Math.PI * 2);
+    ctx.ellipse(bodyW * 0.7, bodyH * 1.15, 3, 2, 0, 0, Math.PI * 2);
+    ctx.fill();
 
     ctx.restore();
   }
