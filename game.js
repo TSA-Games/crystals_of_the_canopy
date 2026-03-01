@@ -373,47 +373,47 @@
 
     drawPlayer(ctx, player);
 
-    ctx.restore();
-
-    // Draw HUD
+    // Draw HUD on scaled canvas
     ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-    ctx.fillRect(0, 0, 350 * PIXEL_RATIO, 90 * PIXEL_RATIO);
+    ctx.fillRect(0, 0, 350, 90);
 
     ctx.fillStyle = '#fff';
-    ctx.font = `bold ${16 * PIXEL_RATIO}px Arial`;
+    ctx.font = `bold 16px Arial`;
     ctx.textBaseline = 'top';
-    ctx.fillText(`Score: ${score}`, 16 * PIXEL_RATIO, 12 * PIXEL_RATIO);
-    ctx.fillText(`Coins: ${coinsCollected}/${totalCoins}`, 16 * PIXEL_RATIO, 36 * PIXEL_RATIO);
+    ctx.fillText(`Score: ${score}`, 16, 12);
+    ctx.fillText(`Coins: ${coinsCollected}/${totalCoins}`, 16, 36);
 
     if (player.speedBoostActive) {
       ctx.fillStyle = '#ff6b6b';
-      ctx.font = `bold ${14 * PIXEL_RATIO}px Arial`;
-      ctx.fillText(`⚡ SPEED BOOST! ${player.speedBoostTimer.toFixed(1)}s`, 16 * PIXEL_RATIO, 60 * PIXEL_RATIO);
+      ctx.font = `bold 14px Arial`;
+      ctx.fillText(`⚡ SPEED BOOST! ${player.speedBoostTimer.toFixed(1)}s`, 16, 60);
     }
 
     ctx.fillStyle = '#aaa';
-    ctx.font = `${12 * PIXEL_RATIO}px Arial`;
-    ctx.fillText('ARROWS/WASD - Move | SPACE/W - Jump', 16 * PIXEL_RATIO, height - 24 * PIXEL_RATIO);
+    ctx.font = `12px Arial`;
+    ctx.fillText('ARROWS/WASD - Move | SPACE/W - Jump', 16, height - 24);
 
     // Win screen
     if (gameWon) {
       ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillRect(0, 0, width, height);
 
       ctx.fillStyle = '#00ff00';
-      ctx.font = `bold ${60 * PIXEL_RATIO}px Arial`;
+      ctx.font = `bold 60px Arial`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText('YOU WIN!', canvas.width / 2, canvas.height / 2 - 50 * PIXEL_RATIO);
+      ctx.fillText('YOU WIN!', width / 2, height / 2 - 50);
 
       ctx.fillStyle = '#ffff00';
-      ctx.font = `${28 * PIXEL_RATIO}px Arial`;
-      ctx.fillText(`Final Score: ${score}`, canvas.width / 2, canvas.height / 2 + 30 * PIXEL_RATIO);
+      ctx.font = `28px Arial`;
+      ctx.fillText(`Final Score: ${score}`, width / 2, height / 2 + 30);
 
       ctx.fillStyle = '#ffffff';
-      ctx.font = `${16 * PIXEL_RATIO}px Arial`;
-      ctx.fillText('Refresh to play again', canvas.width / 2, canvas.height / 2 + 80 * PIXEL_RATIO);
+      ctx.font = `16px Arial`;
+      ctx.fillText('Refresh to play again', width / 2, height / 2 + 80);
     }
+
+    ctx.restore();
   }
 
   // ============================================================================
