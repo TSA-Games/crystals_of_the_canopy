@@ -12,13 +12,13 @@
   const JUMP_POWER = 350;
   const TERMINAL_VELOCITY = 400;
   const ACCELERATION = 1200;
-  const FRICTION = 0.88;
+  const  FRICTION = 0.88;
   const JUMP_BUFFER_TIME = 0.12; // 120ms
   const COYOTE_TIME = 0.1; // 100ms
   const SPEED_BOOST_DURATION = 4;
   const SPEED_BOOST_MULTIPLIER = 2;
   const PLAYER_WIDTH = 24;
-  const PLAYER_HEIGHT = 32;
+  const PLAYER_HEIGHT= 32;
   const NUM_PLATFORMS = 12;
   const PLATFORM_HEIGHT = 14;
   const COIN_POINTS = 10;
