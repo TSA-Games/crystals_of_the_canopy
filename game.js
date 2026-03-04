@@ -102,6 +102,7 @@
   let coinsCollected = 0;
   let totalCoins = 0;
   let gameWon = false;
+  let currentLevel = 1;
 
   // ============================================================================
   // GAME INITIALIZATION
@@ -111,21 +112,54 @@
     crystals.length = 0;
     coins.length = 0;
 
-    const platformWidth = Math.max(120, width / 8);
-    const platformSpacing = width / (NUM_PLATFORMS + 0.5);
-    const verticalVariation = height / 2;
+    if (currentLevel === 1) {
+      // Level 1: Standard 12 platforms with gentle slope
+      const platformWidth = Math.max(120, width / 8);
+      const platformSpacing = width / (NUM_PLATFORMS + 0.5);
+      const verticalVariation = height / 2;
 
-    for (let i = 0; i < NUM_PLATFORMS; i++) {
-      const x = platformSpacing * (i + 0.5);
-      const baseY = height * 0.5 - (i * verticalVariation / NUM_PLATFORMS) * 0.8;
-      const y = Math.max(80, Math.min(height - 100, baseY + (Math.random() - 0.5) * 40));
+      for (let i = 0; i < NUM_PLATFORMS; i++) {
+        const x = platformSpacing * (i + 0.5);
+        const baseY = height * 0.5 - (i * verticalVariation / NUM_PLATFORMS) * 0.8;
+        const y = Math.max(80, Math.min(height - 100, baseY + (Math.random() - 0.5) * 40));
 
-      platforms.push({
-        x: Math.max(platformWidth / 2, Math.min(width - platformWidth / 2, x)),
-        y: y,
-        w: platformWidth,
-        h: PLATFORM_HEIGHT
-      });
+        platforms.push({
+          x: Math.max(platformWidth / 2, Math.min(width - platformWidth / 2, x)),
+          y: y,
+          w: platformWidth,
+          h: PLATFORM_HEIGHT
+        });
+      }
+    } else if (currentLevel === 2) {
+      // Level 2: More complex pattern with varied sizes and gaps
+      const platformWidth = Math.max(80, width / 12);
+      let x = 40;
+      let y = height * 0.6;
+      
+      // Create a zigzag pattern with varying platform sizes
+      while (x < width - 100) {
+        const randomSize = Math.random();
+        let w = platformWidth;
+        let nextX = x + (80 + Math.random() * 60); // variable gap
+        
+        // Occasional wider platform
+        if (randomSize > 0.7) {
+          w = platformWidth * 1.5;
+        }
+        
+        // Vary height
+        y += (Math.random() - 0.5) * 60;
+        y = Math.max(80, Math.min(height - 100, y));
+
+        platforms.push({
+          x: Math.min(width - w / 2, x + w / 2),
+          y: y,
+          w: w,
+          h: PLATFORM_HEIGHT
+        });
+
+        x = nextX;
+      }
     }
 
     platforms.sort((a, b) => a.x - b.x);
@@ -308,9 +342,18 @@
       return;
     }
 
-    // Win condition
+    // Win/Level progression
     if (coinsCollected === totalCoins && totalCoins > 0 && player.x > width - 80 && !gameWon) {
-      gameWon = true;
+      if (currentLevel === 1) {
+        // Advance to level 2
+        currentLevel = 2;
+        gameWon = false;
+        _resetPlayer();
+        _initGame();
+      } else if (currentLevel === 2) {
+        // Game complete
+        gameWon = true;
+      }
     }
   }
 
@@ -396,18 +439,19 @@
 
     // Draw HUD on scaled canvas
     ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-    ctx.fillRect(0, 0, 350, 90);
+    ctx.fillRect(0, 0, 350, 110);
 
     ctx.fillStyle = '#fff';
     ctx.font = `bold 16px Arial`;
     ctx.textBaseline = 'top';
-    ctx.fillText(`Score: ${score}`, 16, 12);
-    ctx.fillText(`Coins: ${coinsCollected}/${totalCoins}`, 16, 36);
+    ctx.fillText(`Level: ${currentLevel}`, 16, 12);
+    ctx.fillText(`Score: ${score}`, 16, 32);
+    ctx.fillText(`Coins: ${coinsCollected}/${totalCoins}`, 16, 52);
 
     if (player.speedBoostActive) {
       ctx.fillStyle = '#ff6b6b';
       ctx.font = `bold 14px Arial`;
-      ctx.fillText(`⚡ SPEED BOOST! ${player.speedBoostTimer.toFixed(1)}s`, 16, 60);
+      ctx.fillText(`⚡ SPEED BOOST! ${player.speedBoostTimer.toFixed(1)}s`, 16, 76);
     }
 
     ctx.fillStyle = '#aaa';
@@ -423,7 +467,7 @@
       ctx.font = `bold 60px Arial`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText('YOU WIN!', width / 2, height / 2 - 50);
+      ctx.fillText('LEVEL COMPLETE!', width / 2, height / 2 - 50);
 
       ctx.fillStyle = '#ffff00';
       ctx.font = `28px Arial`;
@@ -522,17 +566,33 @@
     ctx.arc(w / 2, h * 0.08, headR, 0, Math.PI * 2);
     ctx.fill();
 
-    // Hair
-    ctx.fillStyle = '#d4a574';
+    // Hair (brown, boy style - short)
+    ctx.fillStyle = '#8b6f47';
     ctx.beginPath();
     ctx.arc(w / 2, h * 0.08, headR, 0, Math.PI);
     ctx.fill();
 
+    // Hair spikes (boy hair)
+    ctx.fillStyle = '#8b6f47';
     ctx.beginPath();
-    ctx.arc(w / 2 - headR * 0.5, h * 0, headR * 0.4, 0, Math.PI * 2);
+    ctx.moveTo(w / 2 - headR * 0.4, h * -0.05);
+    ctx.lineTo(w / 2 - headR * 0.3, h * -0.15);
+    ctx.lineTo(w / 2 - headR * 0.1, h * -0.05);
+    ctx.closePath();
     ctx.fill();
+
     ctx.beginPath();
-    ctx.arc(w / 2 + headR * 0.5, h * 0, headR * 0.4, 0, Math.PI * 2);
+    ctx.moveTo(w / 2, h * -0.08);
+    ctx.lineTo(w / 2 + headR * 0.05, h * -0.18);
+    ctx.lineTo(w / 2 + headR * 0.2, h * -0.08);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(w / 2 + headR * 0.4, h * -0.05);
+    ctx.lineTo(w / 2 + headR * 0.3, h * -0.15);
+    ctx.lineTo(w / 2 + headR * 0.1, h * -0.05);
+    ctx.closePath();
     ctx.fill();
 
     // Eyes
@@ -542,33 +602,37 @@
     ctx.arc(w / 2 + headR * 0.3, h * 0.05, headR * 0.2, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.fillStyle = '#1a1a1a';
+    ctx.fillStyle = '#0055aa';
     ctx.beginPath();
-    ctx.arc(w / 2 - headR * 0.3, h * 0.05, headR * 0.1, 0, Math.PI * 2);
-    ctx.arc(w / 2 + headR * 0.3, h * 0.05, headR * 0.1, 0, Math.PI * 2);
+    ctx.arc(w / 2 - headR * 0.3, h * 0.05, headR * 0.12, 0, Math.PI * 2);
+    ctx.arc(w / 2 + headR * 0.3, h * 0.05, headR * 0.12, 0, Math.PI * 2);
     ctx.fill();
 
-    // Blush
-    ctx.fillStyle = 'rgba(255, 170, 180, 0.6)';
+    ctx.fillStyle = '#000';
     ctx.beginPath();
-    ctx.arc(w / 2 - headR * 0.5, h * 0.12, headR * 0.15, 0, Math.PI * 2);
-    ctx.arc(w / 2 + headR * 0.5, h * 0.12, headR * 0.15, 0, Math.PI * 2);
+    ctx.arc(w / 2 - headR * 0.3, h * 0.05, headR * 0.08, 0, Math.PI * 2);
+    ctx.arc(w / 2 + headR * 0.3, h * 0.05, headR * 0.08, 0, Math.PI * 2);
     ctx.fill();
 
-    // Smile
-    ctx.strokeStyle = '#cc6666';
+    // Simple smile
+    ctx.strokeStyle = '#666';
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.arc(w / 2, h * 0.22, headR * 0.12, 0, Math.PI);
+    ctx.arc(w / 2, h * 0.22, headR * 0.1, 0, Math.PI);
     ctx.stroke();
 
-    // Body
-    ctx.fillStyle = '#ff69b4';
-    ctx.fillRect(w * 0.08, h * 0.48, w * 0.84, h * 0.32);
+    // Blue dress/shirt
+    ctx.fillStyle = '#2563eb';
+    ctx.fillRect(w * 0.08, h * 0.45, w * 0.84, h * 0.48);
 
-    // Shorts
-    ctx.fillStyle = '#4a90e2';
-    ctx.fillRect(w * 0.12, h * 0.78, w * 0.76, h * 0.15);
+    // Dress collar
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.moveTo(w * 0.25, h * 0.45);
+    ctx.lineTo(w / 2, h * 0.35);
+    ctx.lineTo(w * 0.75, h * 0.45);
+    ctx.closePath();
+    ctx.fill();
 
     // Arms
     ctx.strokeStyle = '#ffcc99';
@@ -588,6 +652,7 @@
 
     // Legs
     const legSwing = Math.sin(pl.walkTimer) * 4 * (Math.abs(pl.vx) / pl.maxSpeed);
+    ctx.strokeStyle = '#ffcc99';
     ctx.beginPath();
     ctx.moveTo(w * 0.3, h * 0.92);
     ctx.lineTo(w * 0.3 + legSwing, h * 1.08);
