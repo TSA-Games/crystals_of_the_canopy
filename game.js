@@ -113,53 +113,29 @@
     coins.length = 0;
 
     if (currentLevel === 1) {
-      // Level 1: Standard 12 platforms with gentle slope
-      const platformWidth = Math.max(120, width / 8);
-      const platformSpacing = width / (NUM_PLATFORMS + 0.5);
-      const verticalVariation = height / 2;
-
-      for (let i = 0; i < NUM_PLATFORMS; i++) {
-        const x = platformSpacing * (i + 0.5);
-        const baseY = height * 0.5 - (i * verticalVariation / NUM_PLATFORMS) * 0.8;
-        const y = Math.max(80, Math.min(height - 100, baseY + (Math.random() - 0.5) * 40));
-
-        platforms.push({
-          x: Math.max(platformWidth / 2, Math.min(width - platformWidth / 2, x)),
-          y: y,
-          w: platformWidth,
-          h: PLATFORM_HEIGHT
-        });
-      }
-    } else if (currentLevel === 2) {
-      // Level 2: More complex pattern with varied sizes and gaps
-      const platformWidth = Math.max(80, width / 12);
-      let x = 40;
-      let y = height * 0.6;
+      // Level 1: EASY - Wide, evenly spaced platforms with gentle slope
+      const baseScale = width / 800; // Scale based on window width
       
-      // Create a zigzag pattern with varying platform sizes
-      while (x < width - 100) {
-        const randomSize = Math.random();
-        let w = platformWidth;
-        let nextX = x + (80 + Math.random() * 60); // variable gap
-        
-        // Occasional wider platform
-        if (randomSize > 0.7) {
-          w = platformWidth * 1.5;
-        }
-        
-        // Vary height
-        y += (Math.random() - 0.5) * 60;
-        y = Math.max(80, Math.min(height - 100, y));
-
-        platforms.push({
-          x: Math.min(width - w / 2, x + w / 2),
-          y: y,
-          w: w,
-          h: PLATFORM_HEIGHT
-        });
-
-        x = nextX;
-      }
+      platforms.push({ x: 80 * baseScale, y: 450, w: 140, h: PLATFORM_HEIGHT });      // Start
+      platforms.push({ x: 200 * baseScale, y: 420, w: 140, h: PLATFORM_HEIGHT });     // Easy slope up
+      platforms.push({ x: 320 * baseScale, y: 390, w: 140, h: PLATFORM_HEIGHT });     // Continue up
+      platforms.push({ x: 440 * baseScale, y: 380, w: 140, h: PLATFORM_HEIGHT });     // Peak
+      platforms.push({ x: 560 * baseScale, y: 390, w: 140, h: PLATFORM_HEIGHT });     // Gentle down
+      platforms.push({ x: 680 * baseScale, y: 420, w: 140, h: PLATFORM_HEIGHT });     // Continue down
+      
+    } else if (currentLevel === 2) {
+      // Level 2: HARD - Smaller, tricky platforms with challenging gaps and heights
+      const baseScale = width / 800; // Scale based on window width
+      
+      platforms.push({ x: 60 * baseScale, y: 480, w: 100, h: PLATFORM_HEIGHT });      // Start (narrow)
+      platforms.push({ x: 160 * baseScale, y: 420, w: 80, h: PLATFORM_HEIGHT });      // Big jump up
+      platforms.push({ x: 240 * baseScale, y: 350, w: 90, h: PLATFORM_HEIGHT });      // High jump
+      platforms.push({ x: 340 * baseScale, y: 380, w: 70, h: PLATFORM_HEIGHT });      // Down & narrow
+      platforms.push({ x: 420 * baseScale, y: 300, w: 85, h: PLATFORM_HEIGHT });      // Jump up high
+      platforms.push({ x: 520 * baseScale, y: 370, w: 75, h: PLATFORM_HEIGHT });      // Big drop
+      platforms.push({ x: 600 * baseScale, y: 320, w: 80, h: PLATFORM_HEIGHT });      // Up again
+      platforms.push({ x: 700 * baseScale, y: 400, w: 95, h: PLATFORM_HEIGHT });      // Final descent
+      platforms.push({ x: 770 * baseScale, y: 450, w: 100, h: PLATFORM_HEIGHT });     // End
     }
 
     platforms.sort((a, b) => a.x - b.x);
