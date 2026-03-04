@@ -36,7 +36,7 @@
 
   // Load background images
   const backgroundImg = new Image();
-  backgroundImg.src = 'images/forest_background.svg';
+  backgroundImg.src = 'comic-forest.png';
 
   let width = 800;
   let height = 600;
