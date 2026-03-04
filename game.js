@@ -127,15 +127,15 @@
       // Level 2: HARD - Smaller, tricky platforms with challenging gaps and heights
       const baseScale = width / 800; // Scale based on window width
       
-      platforms.push({ x: 60 * baseScale, y: 480, w: 100, h: PLATFORM_HEIGHT });      // Start (narrow)
-      platforms.push({ x: 160 * baseScale, y: 420, w: 80, h: PLATFORM_HEIGHT });      // Big jump up
-      platforms.push({ x: 240 * baseScale, y: 350, w: 90, h: PLATFORM_HEIGHT });      // High jump
-      platforms.push({ x: 340 * baseScale, y: 380, w: 70, h: PLATFORM_HEIGHT });      // Down & narrow
-      platforms.push({ x: 420 * baseScale, y: 300, w: 85, h: PLATFORM_HEIGHT });      // Jump up high
-      platforms.push({ x: 520 * baseScale, y: 370, w: 75, h: PLATFORM_HEIGHT });      // Big drop
-      platforms.push({ x: 600 * baseScale, y: 320, w: 80, h: PLATFORM_HEIGHT });      // Up again
-      platforms.push({ x: 700 * baseScale, y: 400, w: 95, h: PLATFORM_HEIGHT });      // Final descent
-      platforms.push({ x: 770 * baseScale, y: 450, w: 100, h: PLATFORM_HEIGHT });     // End
+      platforms.push({ x: 60 * baseScale, y: 480, w: 115, h: PLATFORM_HEIGHT });      // Start (narrow)
+      platforms.push({ x: 160 * baseScale, y: 420, w: 95, h: PLATFORM_HEIGHT });      // Big jump up
+      platforms.push({ x: 240 * baseScale, y: 350, w: 105, h: PLATFORM_HEIGHT });     // High jump
+      platforms.push({ x: 340 * baseScale, y: 380, w: 85, h: PLATFORM_HEIGHT });      // Down & narrow
+      platforms.push({ x: 420 * baseScale, y: 300, w: 100, h: PLATFORM_HEIGHT });     // Jump up high
+      platforms.push({ x: 520 * baseScale, y: 370, w: 90, h: PLATFORM_HEIGHT });      // Big drop
+      platforms.push({ x: 600 * baseScale, y: 320, w: 95, h: PLATFORM_HEIGHT });      // Up again
+      platforms.push({ x: 700 * baseScale, y: 400, w: 110, h: PLATFORM_HEIGHT });     // Final descent
+      platforms.push({ x: 770 * baseScale, y: 450, w: 115, h: PLATFORM_HEIGHT });     // End
     }
 
     platforms.sort((a, b) => a.x - b.x);
