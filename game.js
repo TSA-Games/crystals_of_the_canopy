@@ -319,8 +319,8 @@
       return;
     }
 
-    // Win/Level progression
-    if (coinsCollected === totalCoins && totalCoins > 0 && player.x > width - 80 && !gameWon) {
+    // Win/Level progression - Win on reaching rightmost bridge, coins optional
+    if (player.x > width - 80 && !gameWon) {
       if (currentLevel === 1) {
         // Advance to level 2
         currentLevel = 2;
