@@ -1,7 +1,5 @@
 // ============================================================================
-// Crystals of the Canopy - Professional Platformer Game
-// All 9 improvements: 12+ platforms, fixed collisions, jump buffering,
-// coyote time, acceleration/deceleration, responsive design
+// Crystals of the Canopy - Professional Platformer Game (patched)
 // ============================================================================
 
 (function () {
@@ -30,29 +28,49 @@
   // CANVAS & RENDERING
   // ============================================================================
   const canvas = document.getElementById('game');
+  if (!canvas) {
+    console.error('Canvas element with id "game" not found.');
+    return;
+  }
   const ctx = canvas.getContext('2d');
 
   let width = 800;
   let height = 600;
   const PIXEL_RATIO = Math.max(1, window.devicePixelRatio || 1);
 
-  function resizeCanvas() {
-    width = Math.max(320, window.innerWidth);
-    height = Math.max(240, window.innerHeight);
+  function resizeCanvas(shouldInit = true) {
+    const newWidth = Math.max(320, window.innerWidth);
+    const newHeight = Math.max(240, window.innerHeight);
+
+    // Only reinitialize if size actually changed or explicit init requested
+    const sizeChanged = newWidth !== width || newHeight !== height;
+    width = newWidth;
+    height = newHeight;
+
     canvas.style.width = width + 'px';
     canvas.style.height = height + 'px';
     canvas.width = Math.floor(width * PIXEL_RATIO);
     canvas.height = Math.floor(height * PIXEL_RATIO);
     ctx.imageSmoothingEnabled = false;
-    _initGame();
+
+    if (shouldInit && sizeChanged) {
+      _initGame();
+      _resetPlayer();
+    }
   }
 
   // ============================================================================
   // INPUT HANDLING
   // ============================================================================
   const keys = {};
-  window.addEventListener('keydown', (e) => (keys[e.key] = true));
-  window.addEventListener('keyup', (e) => (keys[e.key] = false));
+  window.addEventListener('keydown', (e) => {
+    keys[e.key] = true;
+    if (e.code) keys[e.code] = true;
+  });
+  window.addEventListener('keyup', (e) => {
+    keys[e.key] = false;
+    if (e.code) keys[e.code] = false;
+  });
 
   // ============================================================================
   // PLAYER OBJECT
@@ -132,16 +150,16 @@
         });
       }
 
-      if (i % 2 === 0 && i < platforms.length) {
-        const crystalX = Math.max(20, Math.min(width - 20, p.x + (i % 2 ? 40 : -40)));
-        crystals.push({
-          x: crystalX,
-          y: p.y - 40,
-          r: 8,
-          hue: 180 + i * 15,
-          collected: false
-        });
-      }
+      // Alternate crystal left/right by index parity
+      const crystalOffset = (i % 2 === 0) ? -40 : 40;
+      const crystalX = Math.max(20, Math.min(width - 20, p.x + crystalOffset));
+      crystals.push({
+        x: crystalX,
+        y: p.y - 40,
+        r: 8,
+        hue: (180 + i * 15) % 360,
+        collected: false
+      });
     }
 
     totalCoins = coins.length;
@@ -163,19 +181,20 @@
     _spawnPickups();
   }
 
+  // Initialize once, then hook resize
+  resizeCanvas(false); // set canvas size without reinitializing game yet
   _initGame();
   _resetPlayer();
-
-  // now that _initGame exists and platforms are defined, hook resize
-  window.addEventListener('resize', resizeCanvas);
-  resizeCanvas();
+  window.addEventListener('resize', () => resizeCanvas(true));
 
   // ============================================================================
   // GAME LOOP
   // ============================================================================
   let lastTime = performance.now();
   function gameLoop(now) {
-    const dt = Math.min(0.016, (now - lastTime) / 1000);
+    const rawDt = (now - lastTime) / 1000;
+    // allow larger dt for slow frames but cap to avoid physics explosion
+    const dt = Math.min(0.05, rawDt);
     lastTime = now;
     _update(dt);
     _render();
@@ -189,7 +208,7 @@
   function _update(dt) {
     const moveLeft = keys['ArrowLeft'] || keys['a'];
     const moveRight = keys['ArrowRight'] || keys['d'];
-    const jumpKey = keys['ArrowUp'] || keys['w'] || keys[' '];
+    const jumpKey = keys['ArrowUp'] || keys['w'] || keys['Space'] || keys['Spacebar'] || keys[' '];
 
     // Smooth acceleration/deceleration
     const speedMultiplier = player.speedBoostActive ? SPEED_BOOST_MULTIPLIER : 1;
@@ -324,11 +343,11 @@
       return;
     }
 
-    // Side collisions
+    // Side collisions - compute actual overlaps
     const overlapLeft = plRight - pLeft;
     const overlapRight = pRight - plLeft;
-    const overlapTop = plBottom - plTop;
-    const overlapBottom = pBottom - plTop;
+    const overlapTop = plBottom - pTop;    // corrected: player bottom vs platform top
+    const overlapBottom = pBottom - plTop; // platform bottom vs player top
 
     if (overlapLeft < overlapRight && overlapLeft < overlapTop && overlapLeft < overlapBottom) {
       player.x = pLeft - player.w;
@@ -421,7 +440,6 @@
   // ============================================================================
   // DRAWING FUNCTIONS
   // ============================================================================
-
   function drawCoin(ctx, x, y, r) {
     ctx.save();
     ctx.translate(x, y);
