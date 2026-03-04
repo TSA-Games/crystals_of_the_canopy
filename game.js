@@ -251,7 +251,8 @@
     }
 
     if (player.jumpBufferCounter > 0 && player.coyoteCounter > 0) {
-      player.vy = -JUMP_POWER;
+      const jumpPower = player.speedBoostActive ? JUMP_POWER * SPEED_BOOST_MULTIPLIER : JUMP_POWER;
+      player.vy = -jumpPower;
       player.onGround = false;
       player.coyoteCounter = 0;
       player.jumpBufferCounter = 0;
