@@ -46,8 +46,6 @@
     ctx.imageSmoothingEnabled = false;
     _initGame();
   }
-  window.addEventListener('resize', resizeCanvas);
-  resizeCanvas();
 
   // ============================================================================
   // INPUT HANDLING
@@ -167,6 +165,10 @@
 
   _initGame();
   _resetPlayer();
+
+  // now that _initGame exists and platforms are defined, hook resize
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
 
   // ============================================================================
   // GAME LOOP
