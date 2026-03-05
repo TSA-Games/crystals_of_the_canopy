@@ -36,7 +36,7 @@
 
   // Load background images
   const backgroundImg = new Image();
-  backgroundImg.src = 'forest_background.svg';
+  backgroundImg.src = 'images/forest_background.png';
 
   let width = 800;
   let height = 600;
@@ -388,12 +388,12 @@
   function _render() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw background
-    if (currentLevel === 1 && backgroundImg.complete) {
-      // Level 1: Draw the forest background image
+    // Draw background (forest for all levels)
+    if (backgroundImg.complete) {
+      // Use forest background image for all levels
       ctx.drawImage(backgroundImg, 0, 0, canvas.width, canvas.height);
     } else {
-      // Level 2 and fallback: Draw gradient background
+      // Fallback gradient while image loads
       const bgGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
       bgGrad.addColorStop(0, '#87ceeb');
       bgGrad.addColorStop(1, '#2d5016');
