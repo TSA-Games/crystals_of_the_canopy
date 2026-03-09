@@ -1,6 +1,5 @@
-// ============================================================================
 // Crystals of the Canopy - Professional Platformer Game (patched)
-// ============================================================================
+// Corrected: removed background image, fixed brace, added Level 3
 
 (function () {
   'use strict';
@@ -12,14 +11,13 @@
   const JUMP_POWER = 350;
   const TERMINAL_VELOCITY = 400;
   const ACCELERATION = 1200;
-  const  FRICTION = 0.88;
+  const FRICTION = 0.88;
   const JUMP_BUFFER_TIME = 0.12; // 120ms
   const COYOTE_TIME = 0.1; // 100ms
   const SPEED_BOOST_DURATION = 4;
   const SPEED_BOOST_MULTIPLIER = 2;
   const PLAYER_WIDTH = 24;
-  const PLAYER_HEIGHT= 32;
-  const NUM_PLATFORMS = 12;
+  const PLAYER_HEIGHT = 32;
   const PLATFORM_HEIGHT = 14;
   const COIN_POINTS = 10;
   const CRYSTAL_POINTS = 25;
@@ -33,6 +31,7 @@
     return;
   }
   const ctx = canvas.getContext('2d');
+
   let width = 800;
   let height = 600;
   const PIXEL_RATIO = Math.max(1, window.devicePixelRatio || 1);
@@ -41,7 +40,6 @@
     const newWidth = Math.max(320, window.innerWidth);
     const newHeight = Math.max(240, window.innerHeight);
 
-    // Only reinitialize if size actually changed or explicit init requested
     const sizeChanged = newWidth !== width || newHeight !== height;
     width = newWidth;
     height = newHeight;
@@ -106,49 +104,45 @@
   // ============================================================================
   // GAME INITIALIZATION
   // ============================================================================
-    function _initGame() {
+  function _initGame() {
     platforms.length = 0;
     crystals.length = 0;
     coins.length = 0;
 
+    const baseScale = width / 800;
+
     if (currentLevel === 1) {
       // Level 1: EASY - Wide, evenly spaced platforms with gentle slope
-      const baseScale = width / 800; // Scale based on window width
-      
-      platforms.push({ x: 80 * baseScale, y: 450, w: 140, h: PLATFORM_HEIGHT });      // Start
-      platforms.push({ x: 200 * baseScale, y: 420, w: 140, h: PLATFORM_HEIGHT });     // Easy slope up
-      platforms.push({ x: 320 * baseScale, y: 390, w: 140, h: PLATFORM_HEIGHT });     // Continue up
-      platforms.push({ x: 440 * baseScale, y: 380, w: 140, h: PLATFORM_HEIGHT });     // Peak
-      platforms.push({ x: 560 * baseScale, y: 390, w: 140, h: PLATFORM_HEIGHT });     // Gentle down
-      platforms.push({ x: 680 * baseScale, y: 420, w: 140, h: PLATFORM_HEIGHT });     // Continue down
-      
+      platforms.push({ x: 80 * baseScale, y: 450, w: 140, h: PLATFORM_HEIGHT });
+      platforms.push({ x: 200 * baseScale, y: 420, w: 140, h: PLATFORM_HEIGHT });
+      platforms.push({ x: 320 * baseScale, y: 390, w: 140, h: PLATFORM_HEIGHT });
+      platforms.push({ x: 440 * baseScale, y: 380, w: 140, h: PLATFORM_HEIGHT });
+      platforms.push({ x: 560 * baseScale, y: 390, w: 140, h: PLATFORM_HEIGHT });
+      platforms.push({ x: 680 * baseScale, y: 420, w: 140, h: PLATFORM_HEIGHT });
+
     } else if (currentLevel === 2) {
       // Level 2: HARD - Smaller, tricky platforms with challenging gaps and heights
-      const baseScale = width / 800; // Scale based on window width
-      
-      platforms.push({ x: 60 * baseScale, y: 480, w: 115, h: PLATFORM_HEIGHT });      // Start (narrow)
-      platforms.push({ x: 160 * baseScale, y: 420, w: 95, h: PLATFORM_HEIGHT });      // Big jump up (+60px)
-      platforms.push({ x: 240 * baseScale, y: 370, w: 105, h: PLATFORM_HEIGHT });     // High jump (+50px, was 350)
-      platforms.push({ x: 340 * baseScale, y: 400, w: 85, h: PLATFORM_HEIGHT });      // Down & narrow (-30px, was 380)
-      platforms.push({ x: 420 * baseScale, y: 330, w: 100, h: PLATFORM_HEIGHT });     // Jump up high (+70px, was 300)
-      platforms.push({ x: 520 * baseScale, y: 380, w: 90, h: PLATFORM_HEIGHT });      // Big drop (-50px, was 370)
-      platforms.push({ x: 600 * baseScale, y: 330, w: 95, h: PLATFORM_HEIGHT });      // Up again (+50px, was 320)
-      platforms.push({ x: 700 * baseScale, y: 400, w: 110, h: PLATFORM_HEIGHT });     // Final descent (-70px)
-      platforms.push({ x: 770 * baseScale, y: 450, w: 115, h: PLATFORM_HEIGHT });     // End (-50px)
+      platforms.push({ x: 60 * baseScale, y: 480, w: 115, h: PLATFORM_HEIGHT });
+      platforms.push({ x: 160 * baseScale, y: 420, w: 95, h: PLATFORM_HEIGHT });
+      platforms.push({ x: 240 * baseScale, y: 370, w: 105, h: PLATFORM_HEIGHT });
+      platforms.push({ x: 340 * baseScale, y: 400, w: 85, h: PLATFORM_HEIGHT });
+      platforms.push({ x: 420 * baseScale, y: 330, w: 100, h: PLATFORM_HEIGHT });
+      platforms.push({ x: 520 * baseScale, y: 380, w: 90, h: PLATFORM_HEIGHT });
+      platforms.push({ x: 600 * baseScale, y: 330, w: 95, h: PLATFORM_HEIGHT });
+      platforms.push({ x: 700 * baseScale, y: 400, w: 110, h: PLATFORM_HEIGHT });
+      platforms.push({ x: 770 * baseScale, y: 450, w: 115, h: PLATFORM_HEIGHT });
 
     } else if (currentLevel === 3) {
       // Level 3: VERY HARD - staggered, alternating heights with tighter gaps
-      const baseScale = width / 800;
-
-      platforms.push({ x: 70 * baseScale,  y: 500, w: 110, h: PLATFORM_HEIGHT });     // Start
-      platforms.push({ x: 180 * baseScale, y: 430, w: 90,  h: PLATFORM_HEIGHT });     // Up
-      platforms.push({ x: 260 * baseScale, y: 360, w: 80,  h: PLATFORM_HEIGHT });     // Higher, narrow
-      platforms.push({ x: 340 * baseScale, y: 410, w: 75,  h: PLATFORM_HEIGHT });     // Drop
-      platforms.push({ x: 430 * baseScale, y: 340, w: 85,  h: PLATFORM_HEIGHT });     // High, small
-      platforms.push({ x: 520 * baseScale, y: 390, w: 80,  h: PLATFORM_HEIGHT });     // Mid
-      platforms.push({ x: 610 * baseScale, y: 320, w: 75,  h: PLATFORM_HEIGHT });     // High again
-      platforms.push({ x: 700 * baseScale, y: 370, w: 80,  h: PLATFORM_HEIGHT });     // Drop
-      platforms.push({ x: 790 * baseScale, y: 330, w: 90,  h: PLATFORM_HEIGHT });     // Final tricky bridge
+      platforms.push({ x: 70 * baseScale,  y: 500, w: 110, h: PLATFORM_HEIGHT });
+      platforms.push({ x: 180 * baseScale, y: 430, w: 90,  h: PLATFORM_HEIGHT });
+      platforms.push({ x: 260 * baseScale, y: 360, w: 80,  h: PLATFORM_HEIGHT });
+      platforms.push({ x: 340 * baseScale, y: 410, w: 75,  h: PLATFORM_HEIGHT });
+      platforms.push({ x: 430 * baseScale, y: 340, w: 85,  h: PLATFORM_HEIGHT });
+      platforms.push({ x: 520 * baseScale, y: 390, w: 80,  h: PLATFORM_HEIGHT });
+      platforms.push({ x: 610 * baseScale, y: 320, w: 75,  h: PLATFORM_HEIGHT });
+      platforms.push({ x: 700 * baseScale, y: 370, w: 80,  h: PLATFORM_HEIGHT });
+      platforms.push({ x: 790 * baseScale, y: 330, w: 90,  h: PLATFORM_HEIGHT });
     }
 
     platforms.sort((a, b) => a.x - b.x);
@@ -173,7 +167,6 @@
         });
       }
 
-      // Alternate crystal left/right by index parity
       const crystalOffset = (i % 2 === 0) ? -40 : 40;
       const crystalX = Math.max(20, Math.min(width - 20, p.x + crystalOffset));
       crystals.push({
@@ -216,7 +209,6 @@
   let lastTime = performance.now();
   function gameLoop(now) {
     const rawDt = (now - lastTime) / 1000;
-    // allow larger dt for slow frames but cap to avoid physics explosion
     const dt = Math.min(0.05, rawDt);
     lastTime = now;
     _update(dt);
@@ -233,7 +225,6 @@
     const moveRight = keys['ArrowRight'] || keys['d'];
     const jumpKey = keys['ArrowUp'] || keys['w'] || keys['Space'] || keys['Spacebar'] || keys[' '];
 
-    // Smooth acceleration/deceleration
     const speedMultiplier = player.speedBoostActive ? SPEED_BOOST_MULTIPLIER : 1;
     const targetVx = moveRight ? player.maxSpeed * speedMultiplier :
                      moveLeft ? -player.maxSpeed * speedMultiplier : 0;
@@ -248,7 +239,6 @@
       if (Math.abs(player.vx) < 2) player.vx = 0;
     }
 
-    // Gravity
     if (!player.onGround) {
       player.vy += GRAVITY * dt;
       if (player.vy > TERMINAL_VELOCITY) player.vy = TERMINAL_VELOCITY;
@@ -257,7 +247,6 @@
       player.coyoteCounter = COYOTE_TIME;
     }
 
-    // Jump buffer and coyote time
     player.jumpBufferCounter -= dt;
     if (jumpKey) {
       player.jumpBufferCounter = JUMP_BUFFER_TIME;
@@ -277,13 +266,11 @@
 
     player.x = Math.max(0, Math.min(width - player.w, player.x));
 
-    // Collision detection
     player.onGround = false;
     for (const platform of platforms) {
       _checkPlatformCollision(platform, prevY);
     }
 
-    // Speed boost
     if (player.speedBoostActive) {
       player.speedBoostTimer -= dt;
       if (player.speedBoostTimer <= 0) {
@@ -292,14 +279,12 @@
       }
     }
 
-    // Animation
     if (Math.abs(player.vx) > 5 && player.onGround) {
       player.walkTimer += dt * 8;
     } else {
       player.walkTimer += dt * 2;
     }
 
-    // Collect coins
     for (const coin of coins) {
       if (!coin.collected) {
         const dx = coin.x - (player.x + player.w / 2);
@@ -312,7 +297,6 @@
       }
     }
 
-    // Collect crystals
     for (const crystal of crystals) {
       if (!crystal.collected) {
         const dx = crystal.x - (player.x + player.w / 2);
@@ -326,33 +310,28 @@
       }
     }
 
-    // Fall check
     if (player.y > height + 100) {
       _resetPlayer();
       return;
     }
 
-    // Win/Level progression - Win on reaching rightmost bridge, coins optional
-      // Win/Level progression - Win on reaching rightmost bridge, coins optional
+    // Win/Level progression
     if (player.x > width - 80 && !gameWon) {
       if (currentLevel === 1) {
-        // Advance to level 2
         currentLevel = 2;
         gameWon = false;
         _resetPlayer();
         _initGame();
       } else if (currentLevel === 2) {
-        // Advance to level 3
         currentLevel = 3;
         gameWon = false;
         _resetPlayer();
         _initGame();
       } else if (currentLevel === 3) {
-        // Game complete
         gameWon = true;
       }
     }
-
+  } // end of _update
 
   function _checkPlatformCollision(platform, prevY) {
     const pLeft = platform.x - platform.w / 2;
@@ -365,10 +344,8 @@
     const plTop = player.y;
     const plBottom = player.y + player.h;
 
-    // Horizontal overlap check
     if (plRight <= pLeft || plLeft >= pRight) return;
 
-    // Landing from above
     if (prevY + player.h <= pTop && plBottom >= pTop && player.vy >= 0) {
       player.y = pTop - player.h;
       player.vy = 0;
@@ -376,18 +353,16 @@
       return;
     }
 
-    // Hit from below
     if (prevY >= pBottom && plTop <= pBottom && player.vy < 0) {
       player.y = pBottom;
       player.vy = 0.1;
       return;
     }
 
-    // Side collisions - compute actual overlaps
     const overlapLeft = plRight - pLeft;
     const overlapRight = pRight - plLeft;
-    const overlapTop = plBottom - pTop;    // corrected: player bottom vs platform top
-    const overlapBottom = pBottom - plTop; // platform bottom vs player top
+    const overlapTop = plBottom - pTop;
+    const overlapBottom = pBottom - plTop;
 
     if (overlapLeft < overlapRight && overlapLeft < overlapTop && overlapLeft < overlapBottom) {
       player.x = pLeft - player.w;
@@ -402,12 +377,12 @@
   // RENDER LOGIC
   // ============================================================================
   function _render() {
+    // Clear full canvas (pixel ratio aware)
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw background (forest for all levels)
-   // Draw simple blue background (no image)
-ctx.fillStyle = '#4da6ff'; // pick any blue you like
-ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // Solid blue background (no image)
+    ctx.fillStyle = '#4da6ff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.save();
     ctx.scale(PIXEL_RATIO, PIXEL_RATIO);
@@ -454,7 +429,6 @@ ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.font = `12px Arial`;
     ctx.fillText('ARROWS/WASD - Move | SPACE/W - Jump', 16, height - 24);
 
-    // Win screen
     if (gameWon) {
       ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
       ctx.fillRect(0, 0, width, height);
@@ -562,13 +536,13 @@ ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.arc(w / 2, h * 0.08, headR, 0, Math.PI * 2);
     ctx.fill();
 
-    // Hair (brown, boy style - short)
+    // Hair
     ctx.fillStyle = '#8b6f47';
     ctx.beginPath();
     ctx.arc(w / 2, h * 0.08, headR, 0, Math.PI);
     ctx.fill();
 
-    // Hair spikes (boy hair)
+    // Hair spikes
     ctx.fillStyle = '#8b6f47';
     ctx.beginPath();
     ctx.moveTo(w / 2 - headR * 0.4, h * -0.05);
@@ -610,18 +584,18 @@ ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.arc(w / 2 + headR * 0.3, h * 0.05, headR * 0.08, 0, Math.PI * 2);
     ctx.fill();
 
-    // Simple smile
+    // Smile
     ctx.strokeStyle = '#666';
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.arc(w / 2, h * 0.22, headR * 0.1, 0, Math.PI);
     ctx.stroke();
 
-    // Blue dress/shirt
+    // Shirt
     ctx.fillStyle = '#2563eb';
     ctx.fillRect(w * 0.08, h * 0.45, w * 0.84, h * 0.48);
 
-    // Dress collar
+    // Collar
     ctx.fillStyle = '#ffffff';
     ctx.beginPath();
     ctx.moveTo(w * 0.25, h * 0.45);
