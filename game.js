@@ -33,11 +33,6 @@
     return;
   }
   const ctx = canvas.getContext('2d');
-
-  // Load background images
-  const backgroundImg = new Image();
-  backgroundImg.src = 'images/forest_background.png';
-
   let width = 800;
   let height = 600;
   const PIXEL_RATIO = Math.max(1, window.devicePixelRatio || 1);
