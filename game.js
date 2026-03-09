@@ -111,7 +111,7 @@
   // ============================================================================
   // GAME INITIALIZATION
   // ============================================================================
-  function _initGame() {
+    function _initGame() {
     platforms.length = 0;
     crystals.length = 0;
     coins.length = 0;
@@ -140,6 +140,20 @@
       platforms.push({ x: 600 * baseScale, y: 330, w: 95, h: PLATFORM_HEIGHT });      // Up again (+50px, was 320)
       platforms.push({ x: 700 * baseScale, y: 400, w: 110, h: PLATFORM_HEIGHT });     // Final descent (-70px)
       platforms.push({ x: 770 * baseScale, y: 450, w: 115, h: PLATFORM_HEIGHT });     // End (-50px)
+
+    } else if (currentLevel === 3) {
+      // Level 3: VERY HARD - staggered, alternating heights with tighter gaps
+      const baseScale = width / 800;
+
+      platforms.push({ x: 70 * baseScale,  y: 500, w: 110, h: PLATFORM_HEIGHT });     // Start
+      platforms.push({ x: 180 * baseScale, y: 430, w: 90,  h: PLATFORM_HEIGHT });     // Up
+      platforms.push({ x: 260 * baseScale, y: 360, w: 80,  h: PLATFORM_HEIGHT });     // Higher, narrow
+      platforms.push({ x: 340 * baseScale, y: 410, w: 75,  h: PLATFORM_HEIGHT });     // Drop
+      platforms.push({ x: 430 * baseScale, y: 340, w: 85,  h: PLATFORM_HEIGHT });     // High, small
+      platforms.push({ x: 520 * baseScale, y: 390, w: 80,  h: PLATFORM_HEIGHT });     // Mid
+      platforms.push({ x: 610 * baseScale, y: 320, w: 75,  h: PLATFORM_HEIGHT });     // High again
+      platforms.push({ x: 700 * baseScale, y: 370, w: 80,  h: PLATFORM_HEIGHT });     // Drop
+      platforms.push({ x: 790 * baseScale, y: 330, w: 90,  h: PLATFORM_HEIGHT });     // Final tricky bridge
     }
 
     platforms.sort((a, b) => a.x - b.x);
@@ -324,6 +338,7 @@
     }
 
     // Win/Level progression - Win on reaching rightmost bridge, coins optional
+      // Win/Level progression - Win on reaching rightmost bridge, coins optional
     if (player.x > width - 80 && !gameWon) {
       if (currentLevel === 1) {
         // Advance to level 2
@@ -332,11 +347,17 @@
         _resetPlayer();
         _initGame();
       } else if (currentLevel === 2) {
+        // Advance to level 3
+        currentLevel = 3;
+        gameWon = false;
+        _resetPlayer();
+        _initGame();
+      } else if (currentLevel === 3) {
         // Game complete
         gameWon = true;
       }
     }
-  }
+
 
   function _checkPlatformCollision(platform, prevY) {
     const pLeft = platform.x - platform.w / 2;
@@ -389,17 +410,9 @@
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Draw background (forest for all levels)
-    if (backgroundImg.complete) {
-      // Use forest background image for all levels
-      ctx.drawImage(backgroundImg, 0, 0, canvas.width, canvas.height);
-    } else {
-      // Fallback gradient while image loads
-      const bgGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-      bgGrad.addColorStop(0, '#87ceeb');
-      bgGrad.addColorStop(1, '#2d5016');
-      ctx.fillStyle = bgGrad;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
+   // Draw simple blue background (no image)
+ctx.fillStyle = '#4da6ff'; // pick any blue you like
+ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.save();
     ctx.scale(PIXEL_RATIO, PIXEL_RATIO);
