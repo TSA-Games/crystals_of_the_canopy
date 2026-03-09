@@ -1,12 +1,19 @@
-body {
+* {
+  box-sizing: border-box;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
   margin: 0;
-  background-image: url('images/forest background.jpeg'); /* forest background */
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center;
-  color: #000000;
-  font-family: system-ui, sans-serif;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
   overflow: hidden;
+  background: #4da6ff; /* solid blue background */
+  color: #000000;
+  font-family: system-ui, -apple-system, sans-serif;
 }
 
 .hud {
@@ -15,19 +22,27 @@ body {
   left: 8px;
   display: grid;
   gap: 8px;
-  background: rgba(11, 18, 34, 0.7); /* semi-transparent so forest shows through */
+  background: rgba(11, 18, 34, 0.7);
   padding: 8px 12px;
   border: 1px solid #334155;
   border-radius: 8px;
   color: #e2e8f0;
+  z-index: 10;
+  pointer-events: none;
+  font-size: clamp(12px, 2vw, 16px);
 }
 
 canvas {
   display: block;
-  border: 1px solid #334155;
-  border-radius: 8px;
-  background: transparent; /* let forest background show through */
-  margin: 0;
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100vw;
   height: 100vh;
+  background: transparent; /* canvas draws the scene; page background is blue */
+  border: 1px solid #334155;
+  border-radius: 8px;
+  margin: 0;
+  padding: 0;
+  touch-action: none;
 }
