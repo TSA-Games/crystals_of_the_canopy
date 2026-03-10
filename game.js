@@ -455,7 +455,7 @@
       ctx.font = `bold 60px Arial`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText('LEVEL COMPLETE!', width / 2, height / 2 - 50);
+      ctx.fillText('YOU WIN!!', width / 2, height / 2 - 50);
 
       ctx.fillStyle = '#ffff00';
       ctx.font = `28px Arial`;
