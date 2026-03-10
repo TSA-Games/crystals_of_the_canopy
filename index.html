@@ -1,12 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>Crystals of the Canopy</title>
-  <link rel="stylesheet" href="style.css">
+
+  <!-- Inline styles: no external style.css requested -->
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #4da6ff; /* solid blue background */
+      color: #000000;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    .hud {
+      position: fixed;
+      top: 8px;
+      left: 8px;
+      display: grid;
+      gap: 8px;
+      background: rgba(11, 18, 34, 0.7);
+      padding: 8px 12px;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      color: #e2e8f0;
+      z-index: 10;
+      pointer-events: none;
+      font-size: clamp(12px, 2vw, 16px);
+    }
+
+    canvas {
+      display: block;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: transparent; /* canvas draws the scene; page background is blue */
+      border: 1px solid #334155;
+      border-radius: 8px;
+      margin: 0;
+      padding: 0;
+      touch-action: none;
+    }
+  </style>
 </head>
 <body>
   <div class="hud">
@@ -14,8 +65,9 @@
     <div>State: <span id="state">menu</span></div>
   </div>
 
-  <canvas id="game"></canvas>
+  <canvas id="game" width="800" height="600"></canvas>
 
+  <!-- Keep game.js but ensure it no longer loads or draws any forest image -->
   <script src="game.js"></script>
 </body>
 </html>
