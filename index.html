@@ -6,6 +6,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>Crystals of the Canopy</title>
+  <meta name="theme-color" content="#4da6ff" />
+  <link rel="icon" href="images/favicon.ico" />
 
   <!-- Inline styles: no external style.css requested -->
   <style>
@@ -65,9 +67,15 @@
     <div>State: <span id="state">menu</span></div>
   </div>
 
-  <canvas id="game" width="800" height="600"></canvas>
+  <canvas id="game" width="800" height="600" aria-label="Crystals of the Canopy game"></canvas>
 
-  <!-- Keep game.js but ensure it no longer loads or draws any forest image -->
+  <!-- Loading spinner for slow connections -->
+  <div id="loading" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:2em;color:#334155;z-index:100;">Loading...</div>
+  <script>
+    window.addEventListener('load', () => {
+      document.getElementById('loading').style.display = 'none';
+    });
+  </script>
   <script src="game.js"></script>
 </body>
 </html>
