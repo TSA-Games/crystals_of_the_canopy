@@ -32,6 +32,10 @@
   }
   const ctx = canvas.getContext('2d');
 
+  // Load forest background image
+  const forestBg = new Image();
+  forestBg.src = 'images/forest_bg.svg';
+
   let width = 800;
   let height = 600;
   const PIXEL_RATIO = Math.max(1, window.devicePixelRatio || 1);
@@ -380,9 +384,13 @@
     // Clear full canvas (pixel ratio aware)
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Solid blue background (no image)
-    ctx.fillStyle = '#4da6ff';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // Draw forest background image if loaded, otherwise fallback to blue
+    if (forestBg.complete && forestBg.naturalWidth > 0) {
+      ctx.drawImage(forestBg, 0, 0, canvas.width, canvas.height);
+    } else {
+      ctx.fillStyle = '#4da6ff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
 
     ctx.save();
     ctx.scale(PIXEL_RATIO, PIXEL_RATIO);
