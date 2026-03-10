@@ -319,7 +319,18 @@
     }
 
     // Win/Level progression
-    if (player.x > width - 80 && !gameWon) {
+    // Find the rightmost platform
+    const lastPlatform = platforms.reduce((max, p) => p.x > max.x ? p : max, platforms[0]);
+    // Check if player is standing on the last platform
+    const pLeft = lastPlatform.x - lastPlatform.w / 2;
+    const pRight = lastPlatform.x + lastPlatform.w / 2;
+    const playerBottom = player.y + player.h;
+    const onLastPlatform =
+      player.x + player.w / 2 > pLeft &&
+      player.x - player.w / 2 < pRight &&
+      Math.abs(playerBottom - lastPlatform.y) < 8 && player.vy >= 0;
+
+    if (onLastPlatform && !gameWon) {
       if (currentLevel === 1) {
         currentLevel = 2;
         gameWon = false;
