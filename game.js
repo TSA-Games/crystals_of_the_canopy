@@ -33,8 +33,9 @@
   const ctx = canvas.getContext('2d');
 
   // Load forest background image
+  // Load new PNG background image
   const forestBg = new Image();
-  forestBg.src = 'images/forest_bg.svg';
+  forestBg.src = 'images/Untitled design.png';
 
   let width = 800;
   let height = 600;
