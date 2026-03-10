@@ -137,16 +137,15 @@
       platforms.push({ x: 770 * baseScale, y: 450, w: 115, h: PLATFORM_HEIGHT });
 
     } else if (currentLevel === 3) {
-      // Level 3: VERY HARD - staggered, alternating heights with tighter gaps
-      platforms.push({ x: 70 * baseScale,  y: 500, w: 110, h: PLATFORM_HEIGHT });
-      platforms.push({ x: 180 * baseScale, y: 430, w: 90,  h: PLATFORM_HEIGHT });
-      platforms.push({ x: 260 * baseScale, y: 360, w: 80,  h: PLATFORM_HEIGHT });
-      platforms.push({ x: 340 * baseScale, y: 410, w: 75,  h: PLATFORM_HEIGHT });
-      platforms.push({ x: 430 * baseScale, y: 340, w: 85,  h: PLATFORM_HEIGHT });
-      platforms.push({ x: 520 * baseScale, y: 390, w: 80,  h: PLATFORM_HEIGHT });
-      platforms.push({ x: 610 * baseScale, y: 320, w: 75,  h: PLATFORM_HEIGHT });
-      platforms.push({ x: 700 * baseScale, y: 370, w: 80,  h: PLATFORM_HEIGHT });
-      platforms.push({ x: 790 * baseScale, y: 330, w: 90,  h: PLATFORM_HEIGHT });
+  // Level 3: EXTREME - zig-zag, high jumps, varied widths
+  platforms.push({ x: 60 * baseScale,  y: 520, w: 60,  h: PLATFORM_HEIGHT });   // Start, very narrow
+  platforms.push({ x: 160 * baseScale, y: 350, w: 180, h: PLATFORM_HEIGHT });   // Huge jump up, very wide
+  platforms.push({ x: 320 * baseScale, y: 500, w: 70,  h: PLATFORM_HEIGHT });   // Drop down, narrow
+  platforms.push({ x: 420 * baseScale, y: 320, w: 120, h: PLATFORM_HEIGHT });   // Big jump up
+  platforms.push({ x: 540 * baseScale, y: 480, w: 80,  h: PLATFORM_HEIGHT });   // Drop down
+  platforms.push({ x: 640 * baseScale, y: 300, w: 100, h: PLATFORM_HEIGHT });   // Highest platform
+  platforms.push({ x: 720 * baseScale, y: 420, w: 60,  h: PLATFORM_HEIGHT });   // Drop down, very narrow
+  platforms.push({ x: 800 * baseScale, y: 350, w: 140, h: PLATFORM_HEIGHT });   // Final wide platform
     }
 
     platforms.sort((a, b) => a.x - b.x);
