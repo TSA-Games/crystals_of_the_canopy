@@ -111,6 +111,10 @@
   let flashTransitionTimer = 0;
   let flashTransitionNextLevel = null;
 
+  // Woosh sound effect
+  const wooshSound = new Audio('sounds/woosh.mp3');
+  wooshSound.volume = 0.7;
+
   // ============================================================================
   // GAME INITIALIZATION
   // ============================================================================
@@ -375,6 +379,11 @@
         flashTransitionActive = true;
         flashTransitionTimer = 0;
         flashTransitionNextLevel = currentLevel + 1;
+        // Play woosh sound
+        if (wooshSound) {
+          wooshSound.currentTime = 0;
+          wooshSound.play();
+        }
       } else if (currentLevel === 5) {
         gameWon = true;
       }
