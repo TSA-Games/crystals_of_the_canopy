@@ -110,6 +110,16 @@
   // GAME INITIALIZATION
   // ============================================================================
   function _initGame() {
+    } else if (currentLevel === 5) {
+      // Level 5: BLINKING - identical to Level 3, but platforms blink
+      platforms.push({ x: 60 * baseScale,  y: 520, w: 60,  h: PLATFORM_HEIGHT });
+      platforms.push({ x: 160 * baseScale, y: 350, w: 180, h: PLATFORM_HEIGHT });
+      platforms.push({ x: 320 * baseScale, y: 500, w: 70,  h: PLATFORM_HEIGHT });
+      platforms.push({ x: 420 * baseScale, y: 320, w: 120, h: PLATFORM_HEIGHT });
+      platforms.push({ x: 540 * baseScale, y: 480, w: 80,  h: PLATFORM_HEIGHT });
+      platforms.push({ x: 640 * baseScale, y: 300, w: 100, h: PLATFORM_HEIGHT });
+      platforms.push({ x: 720 * baseScale, y: 420, w: 60,  h: PLATFORM_HEIGHT });
+      platforms.push({ x: 800 * baseScale, y: 350, w: 140, h: PLATFORM_HEIGHT });
     platforms.length = 0;
     crystals.length = 0;
     coins.length = 0;
@@ -356,6 +366,11 @@
         _resetPlayer();
         _initGame();
       } else if (currentLevel === 4) {
+        currentLevel = 5;
+        gameWon = false;
+        _resetPlayer();
+        _initGame();
+      } else if (currentLevel === 5) {
         gameWon = true;
       }
     }
@@ -420,14 +435,23 @@
     ctx.scale(PIXEL_RATIO, PIXEL_RATIO);
 
     // Draw platforms
+    let blinkOn = true;
+    if (currentLevel === 5) {
+      // Blink platforms: on for 0.5s, off for 0.5s
+      const blinkPeriod = 1.0; // seconds
+      const blinkTime = (performance.now() / 1000) % blinkPeriod;
+      blinkOn = blinkTime < blinkPeriod / 2;
+    }
     for (const p of platforms) {
-      ctx.fillStyle = '#8b7355';
-      ctx.fillRect(p.x - p.w / 2, p.y, p.w, p.h);
-      ctx.fillStyle = '#654321';
-      ctx.fillRect(p.x - p.w / 2, p.y + p.h, p.w, 2);
-      ctx.strokeStyle = '#a0826d';
-      ctx.lineWidth = 1;
-      ctx.strokeRect(p.x - p.w / 2, p.y, p.w, p.h);
+      if (currentLevel !== 5 || blinkOn) {
+        ctx.fillStyle = '#8b7355';
+        ctx.fillRect(p.x - p.w / 2, p.y, p.w, p.h);
+        ctx.fillStyle = '#654321';
+        ctx.fillRect(p.x - p.w / 2, p.y + p.h, p.w, 2);
+        ctx.strokeStyle = '#a0826d';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(p.x - p.w / 2, p.y, p.w, p.h);
+      }
     }
 
     // Draw collectibles
