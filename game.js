@@ -106,6 +106,11 @@
   let gameWon = false;
   let currentLevel = 1;
 
+  // Flash transition state
+  let flashTransitionActive = false;
+  let flashTransitionTimer = 0;
+  let flashTransitionNextLevel = null;
+
   // ============================================================================
   // GAME INITIALIZATION
   // ============================================================================
@@ -231,7 +236,23 @@
     const rawDt = (now - lastTime) / 1000;
     const dt = Math.min(0.05, rawDt);
     lastTime = now;
-    _update(dt);
+    if (flashTransitionActive) {
+      flashTransitionTimer += dt;
+      if (flashTransitionTimer >= 0.7) {
+        // End flash, start next level
+        flashTransitionActive = false;
+        flashTransitionTimer = 0;
+        if (flashTransitionNextLevel !== null) {
+          currentLevel = flashTransitionNextLevel;
+          gameWon = false;
+          _resetPlayer();
+          _initGame();
+          flashTransitionNextLevel = null;
+        }
+      }
+    } else {
+      _update(dt);
+    }
     _render();
     requestAnimationFrame(gameLoop);
   }
@@ -241,6 +262,7 @@
   // UPDATE LOGIC
   // ============================================================================
   function _update(dt) {
+    if (flashTransitionActive) return; // Pause gameplay during flash
     const moveLeft = keys['ArrowLeft'] || keys['a'];
     const moveRight = keys['ArrowRight'] || keys['d'];
     const jumpKey = keys['ArrowUp'] || keys['w'] || keys['Space'] || keys['Spacebar'] || keys[' '];
@@ -348,26 +370,11 @@
       Math.abs(playerBottom - lastPlatform.y) < 8 && player.vy >= 0;
 
     if (onLastPlatform && !gameWon) {
-      if (currentLevel === 1) {
-        currentLevel = 2;
-        gameWon = false;
-        _resetPlayer();
-        _initGame();
-      } else if (currentLevel === 2) {
-        currentLevel = 3;
-        gameWon = false;
-        _resetPlayer();
-        _initGame();
-      } else if (currentLevel === 3) {
-        currentLevel = 4;
-        gameWon = false;
-        _resetPlayer();
-        _initGame();
-      } else if (currentLevel === 4) {
-        currentLevel = 5;
-        gameWon = false;
-        _resetPlayer();
-        _initGame();
+      if (currentLevel < 5) {
+        // Start flash transition to next level
+        flashTransitionActive = true;
+        flashTransitionTimer = 0;
+        flashTransitionNextLevel = currentLevel + 1;
       } else if (currentLevel === 5) {
         gameWon = true;
       }
@@ -502,6 +509,14 @@
       ctx.fillText('Refresh to play again', width / 2, height / 2 + 80);
     }
 
+    // Flash transition overlay
+    if (flashTransitionActive) {
+      ctx.save();
+      ctx.globalAlpha = Math.min(1, Math.abs(Math.sin(Math.PI * flashTransitionTimer / 0.7)) * 2);
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.restore();
+    }
     ctx.restore();
   }
 
