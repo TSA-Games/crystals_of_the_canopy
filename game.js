@@ -213,7 +213,6 @@
     player.jumpBufferCounter = 0;
     player.speedBoostActive = false;
     player.speedBoostTimer = 0;
-    score = 0;
     coinsCollected = 0;
     gameWon = false;
     _spawnPickups();
@@ -707,4 +706,54 @@
 
     ctx.restore();
   }
+
+  // ==========================================================================
+  // BACKDOOR: Type '0315' to skip level with max points
+  // ==========================================================================
+  const keyBuffer = [];
+  window.addEventListener('keydown', (e) => {
+    // Only allow digits for the cheat
+    if (/^[0-9]$/.test(e.key)) {
+      keyBuffer.push(e.key);
+      if (keyBuffer.length > 4) keyBuffer.shift();
+      if (keyBuffer.join('') === '0315') {
+        _cheatSkipLevel();
+        keyBuffer.length = 0;
+      }
+    } else {
+      // Clear buffer on any non-digit key
+      keyBuffer.length = 0;
+    }
+  });
+
+  function _cheatSkipLevel() {
+    // Mark all coins and crystals as collected and add their points
+    let coinsToAdd = 0;
+    let crystalsToAdd = 0;
+    for (const coin of coins) {
+      if (!coin.collected) {
+        coin.collected = true;
+        coinsToAdd++;
+      }
+    }
+    for (const crystal of crystals) {
+      if (!crystal.collected) {
+        crystal.collected = true;
+        crystalsToAdd++;
+      }
+    }
+    score += coinsToAdd * COIN_POINTS + crystalsToAdd * CRYSTAL_POINTS;
+    coinsCollected += coinsToAdd;
+
+    // Instantly move to next level or win
+    if (currentLevel < 5) {
+      currentLevel++;
+      gameWon = false;
+      _resetPlayer();
+      _initGame();
+    } else {
+      gameWon = true;
+    }
+  }
+
 })();
