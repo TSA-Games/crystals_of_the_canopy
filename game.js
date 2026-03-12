@@ -107,6 +107,10 @@
   let gameWon = false;
   let currentLevel = 1;
 
+  // Level 6 timer
+  let level6Timer = 10;
+  const LEVEL6_TIME_LIMIT = 10;
+
   // Flash transition state
   let flashTransitionActive = false;
   let flashTransitionTimer = 0;
@@ -191,7 +195,7 @@
       magnets.push({ x: 160 * baseScale, y: 340, r: 18 });
       magnets.push({ x: 800 * baseScale, y: 330, r: 18 });
     } else if (currentLevel === 6) {
-      // Level 6: New bridge pattern, moving crystals, moderate difficulty
+      // Level 6: Timed challenge - reach end in 10 seconds
       platforms.push({ x: 80 * baseScale, y: 500, w: 120, h: PLATFORM_HEIGHT });
       platforms.push({ x: 220 * baseScale, y: 420, w: 80, h: PLATFORM_HEIGHT });
       platforms.push({ x: 340 * baseScale, y: 480, w: 100, h: PLATFORM_HEIGHT });
@@ -200,20 +204,9 @@
       platforms.push({ x: 720 * baseScale, y: 350, w: 140, h: PLATFORM_HEIGHT });
       // Magnets
       magnets.push({ x: 220 * baseScale, y: 410, r: 18 });
-      magnets.push({ x: 620 * baseScale, y: 450, r: 18 });
-      // Moving crystals
-      for (let i = 0; i < 4; i++) {
-        crystals.push({
-          x: 200 + i * 150,
-          y: 350 + 60 * Math.sin(i),
-          r: 8,
-          hue: (180 + i * 30) % 360,
-          collected: false,
-          moving: true,
-          movePhase: i * 0.5
-        });
-      }
-  }
+      // Timer reset
+      level6Timer = LEVEL6_TIME_LIMIT;
+    }
 
   platforms.sort((a, b) => a.x - b.x);
   _spawnPickups();
@@ -278,6 +271,9 @@
     coinsCollected = 0;
     gameWon = false;
     _spawnPickups();
+    if (currentLevel === 6) {
+      level6Timer = LEVEL6_TIME_LIMIT;
+    }
   }
 
   // Initialize once, then hook resize
@@ -385,6 +381,14 @@
       player.walkTimer += dt * 2;
     }
 
+    // Level 6 timer logic
+    if (currentLevel === 6 && !gameWon) {
+      level6Timer -= dt;
+      if (level6Timer <= 0) {
+        _resetPlayer();
+        return;
+      }
+    }
     // Magnet attraction for coins
     for (const coin of coins) {
       if (!coin.collected) {
@@ -430,6 +434,15 @@
     if (player.y > height + 100) {
       _resetPlayer();
       return;
+    }
+    // Level 6 timer logic
+    if (currentLevel === 6 && !gameWon) {
+      level6Timer -= dt;
+      if (level6Timer <= 0) {
+        _resetPlayer();
+        level6Timer = LEVEL6_TIME_LIMIT;
+        return;
+      }
     }
 
     // Win/Level progression
@@ -571,6 +584,11 @@
     ctx.fillText(`Level: ${currentLevel}`, 16, 12);
     ctx.fillText(`Score: ${score}`, 16, 32);
     ctx.fillText(`Coins: ${coinsCollected}/${totalCoins}`, 16, 52);
+    if (currentLevel === 6 && !gameWon) {
+      ctx.fillStyle = '#ff3333';
+      ctx.font = `bold 18px Arial`;
+      ctx.fillText(`Time Left: ${level6Timer.toFixed(1)}s`, 16, 72);
+    }
 
     if (player.speedBoostActive) {
       ctx.fillStyle = '#ff6b6b';
