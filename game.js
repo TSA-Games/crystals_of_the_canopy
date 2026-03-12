@@ -912,7 +912,7 @@
     coinsCollected += coinsToAdd;
 
     // Instantly move to next level or win
-    if (currentLevel < 5) {
+    if (currentLevel < 6) {
       currentLevel++;
       gameWon = false;
       _resetPlayer();
