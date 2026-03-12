@@ -108,8 +108,8 @@
   let currentLevel = 1;
 
   // Level 6 timer
-  let level6Timer = 10;
-  const LEVEL6_TIME_LIMIT = 10;
+  let level6Timer = 15;
+  const LEVEL6_TIME_LIMIT = 15;
 
   // Flash transition state
   let flashTransitionActive = false;
