@@ -282,12 +282,28 @@
     player.jumpBufferCounter = 0;
     player.speedBoostActive = false;
     player.speedBoostTimer = 0;
-    coinsCollected = 0;
-    gameWon = false;
-    _spawnPickups();
-    if (currentLevel === 6) {
-      level6Timer = LEVEL6_TIME_LIMIT;
-    }
+      // Reset coins/crystals for current level
+      for (const coin of coins) coin.collected = false;
+      for (const crystal of crystals) crystal.collected = false;
+      coinsCollected = 0;
+      totalCoins = coins.length;
+      if (currentLevel === 6) {
+        // Respawn crystals for Level 6
+        crystals.length = 0;
+        for (let i = 0; i < platforms.length; i++) {
+          const p = platforms[i];
+          const crystalOffset = (i % 2 === 0) ? -40 : 40;
+          const crystalX = Math.max(20, Math.min(width - 20, p.x + crystalOffset));
+          crystals.push({
+            x: crystalX,
+            y: p.y - 40,
+            r: 8,
+            hue: (180 + i * 15) % 360,
+            collected: false
+          });
+        }
+        level6Timer = LEVEL6_TIME_LIMIT;
+      }
   }
 
   // Initialize once, then hook resize
