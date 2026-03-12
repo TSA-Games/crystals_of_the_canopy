@@ -309,10 +309,12 @@
     for (const coin of coins) {
       coin.collected = false;
     }
+    // Reset crystals for current level
+    for (const crystal of crystals) {
+      crystal.collected = false;
+    }
     coinsCollected = 0;
     gameWon = false;
-    // Do not reset score or other pickups
-    // Do not respawn all pickups, just reset coin state
   }
 
   // Initialize once, then hook resize
