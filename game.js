@@ -297,10 +297,14 @@
         flashTransitionActive = false;
         flashTransitionTimer = 0;
         if (flashTransitionNextLevel !== null) {
-          currentLevel = flashTransitionNextLevel;
-          gameWon = false;
-          _resetPlayer();
-          _initGame();
+          if (flashTransitionNextLevel <= 6) {
+            currentLevel = flashTransitionNextLevel;
+            gameWon = false;
+            _resetPlayer();
+            _initGame();
+          } else {
+            gameWon = true;
+          }
           flashTransitionNextLevel = null;
         }
       }
@@ -469,7 +473,15 @@
           wooshSound.play();
         }
       } else if (currentLevel === 6) {
-        gameWon = true;
+        // Start flash transition to YOU WIN
+        flashTransitionActive = true;
+        flashTransitionTimer = 0;
+        flashTransitionNextLevel = 7;
+        // Play woosh sound
+        if (wooshSound) {
+          wooshSound.currentTime = 0;
+          wooshSound.play();
+        }
       }
     }
   } // end of _update
