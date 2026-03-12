@@ -261,6 +261,7 @@
         }
       }
     }
+    // No invisible bridges or road logic; player falls if not on platform, as in other levels
     // Store base positions for moving platforms in Level 7
     if (currentLevel === 7) {
       for (let i = 0; i < platforms.length; i++) {
