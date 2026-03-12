@@ -372,7 +372,7 @@
         flashTransitionActive = false;
         flashTransitionTimer = 0;
         if (flashTransitionNextLevel !== null) {
-          if (flashTransitionNextLevel <= 6) {
+          if (flashTransitionNextLevel <= 7) {
             currentLevel = flashTransitionNextLevel;
             gameWon = false;
             _resetPlayer();
@@ -537,7 +537,7 @@
       Math.abs(playerBottom - lastPlatform.y) < 8 && player.vy >= 0;
 
     if (onLastPlatform && !gameWon) {
-      if (currentLevel < 6) {
+      if (currentLevel < 7) {
         // Start flash transition to next level
         flashTransitionActive = true;
         flashTransitionTimer = 0;
@@ -547,11 +547,11 @@
           wooshSound.currentTime = 0;
           wooshSound.play();
         }
-      } else if (currentLevel === 6) {
+      } else if (currentLevel === 7) {
         // Start flash transition to YOU WIN
         flashTransitionActive = true;
         flashTransitionTimer = 0;
-        flashTransitionNextLevel = 7;
+        flashTransitionNextLevel = 8;
         // Play woosh sound
         if (wooshSound) {
           wooshSound.currentTime = 0;
