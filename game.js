@@ -221,17 +221,20 @@
       // Timer reset
       level6Timer = LEVEL6_TIME_LIMIT;
     } else if (currentLevel === 7) {
-      // Level 7: Moving bridges, almost impossible structure
-      // Moving platforms: add 'moving' property and movement params
-      platforms.push({ x: 60 * baseScale, y: 540, w: 60, h: PLATFORM_HEIGHT, moving: 'x', range: 120, speed: 120 }); // Start, moves horizontally
-      platforms.push({ x: 220 * baseScale, y: 320, w: 60, h: PLATFORM_HEIGHT, moving: 'y', range: 100, speed: 100 }); // Huge jump up, moves vertically
-      platforms.push({ x: 350 * baseScale, y: 520, w: 40, h: PLATFORM_HEIGHT, moving: 'x', range: 80, speed: 140 }); // Drop down, moves horizontally
-      platforms.push({ x: 500 * baseScale, y: 280, w: 80, h: PLATFORM_HEIGHT, moving: 'y', range: 120, speed: 90 }); // Highest platform, moves vertically
-      platforms.push({ x: 650 * baseScale, y: 500, w: 50, h: PLATFORM_HEIGHT, moving: 'x', range: 100, speed: 160 }); // Drop down, moves horizontally
-      platforms.push({ x: 800 * baseScale, y: 250, w: 60, h: PLATFORM_HEIGHT, moving: 'y', range: 80, speed: 110 }); // Final, highest, moves vertically
+      // Level 7: Complex moving bridges, all visible, impossible design
+      // All platforms move horizontally or vertically, spaced for visibility
+      platforms.push({ x: 80 * baseScale, y: 540, w: 80, h: PLATFORM_HEIGHT, moving: 'x', range: 120, speed: 1.2 }); // Start, moves horizontally
+      platforms.push({ x: 200 * baseScale, y: 480, w: 60, h: PLATFORM_HEIGHT, moving: 'y', range: 80, speed: 1.5 }); // Moves vertically
+      platforms.push({ x: 320 * baseScale, y: 420, w: 100, h: PLATFORM_HEIGHT, moving: 'x', range: 140, speed: 1.1 }); // Moves horizontally
+      platforms.push({ x: 440 * baseScale, y: 360, w: 60, h: PLATFORM_HEIGHT, moving: 'y', range: 100, speed: 1.3 }); // Moves vertically
+      platforms.push({ x: 560 * baseScale, y: 300, w: 80, h: PLATFORM_HEIGHT, moving: 'x', range: 120, speed: 1.4 }); // Moves horizontally
+      platforms.push({ x: 680 * baseScale, y: 240, w: 60, h: PLATFORM_HEIGHT, moving: 'y', range: 90, speed: 1.6 }); // Moves vertically
+      platforms.push({ x: 800 * baseScale, y: 180, w: 100, h: PLATFORM_HEIGHT, moving: 'x', range: 160, speed: 1.2 }); // Final, moves horizontally
+      platforms.push({ x: 400 * baseScale, y: 520, w: 60, h: PLATFORM_HEIGHT, moving: 'y', range: 120, speed: 1.7 }); // Extra, moves vertically
+      platforms.push({ x: 600 * baseScale, y: 400, w: 80, h: PLATFORM_HEIGHT, moving: 'x', range: 100, speed: 1.5 }); // Extra, moves horizontally
       // Magnets
-      magnets.push({ x: 350 * baseScale, y: 500, r: 18 });
-      magnets.push({ x: 800 * baseScale, y: 230, r: 18 });
+      magnets.push({ x: 320 * baseScale, y: 420, r: 18 });
+      magnets.push({ x: 800 * baseScale, y: 180, r: 18 });
       // Speed boost crystals
       crystals.length = 0;
       for (let i = 0; i < platforms.length; i++) {
