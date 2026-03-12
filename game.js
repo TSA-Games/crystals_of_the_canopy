@@ -99,6 +99,7 @@
   const platforms = [];
   const crystals = [];
   const coins = [];
+  const magnets = [];
 
   let score = 0;
   let coinsCollected = 0;
@@ -122,48 +123,61 @@
     platforms.length = 0;
     crystals.length = 0;
     coins.length = 0;
+    magnets.length = 0;
     const baseScale = width / 800;
 
-    if (currentLevel === 1) {
+  if (currentLevel === 1) {
       // Level 1: EASY - Wide, evenly spaced platforms with gentle slope
-      platforms.push({ x: 80 * baseScale, y: 450, w: 140, h: PLATFORM_HEIGHT });
-      platforms.push({ x: 200 * baseScale, y: 420, w: 140, h: PLATFORM_HEIGHT });
-      platforms.push({ x: 320 * baseScale, y: 390, w: 140, h: PLATFORM_HEIGHT });
-      platforms.push({ x: 440 * baseScale, y: 380, w: 140, h: PLATFORM_HEIGHT });
-      platforms.push({ x: 560 * baseScale, y: 390, w: 140, h: PLATFORM_HEIGHT });
-      platforms.push({ x: 680 * baseScale, y: 420, w: 140, h: PLATFORM_HEIGHT });
+  platforms.push({ x: 80 * baseScale, y: 450, w: 140, h: PLATFORM_HEIGHT });
+  platforms.push({ x: 200 * baseScale, y: 420, w: 140, h: PLATFORM_HEIGHT });
+  platforms.push({ x: 320 * baseScale, y: 390, w: 140, h: PLATFORM_HEIGHT });
+  platforms.push({ x: 440 * baseScale, y: 380, w: 140, h: PLATFORM_HEIGHT });
+  platforms.push({ x: 560 * baseScale, y: 390, w: 140, h: PLATFORM_HEIGHT });
+  platforms.push({ x: 680 * baseScale, y: 420, w: 140, h: PLATFORM_HEIGHT });
+  // Magnets
+  magnets.push({ x: 160 * baseScale, y: 410, r: 18 });
+  magnets.push({ x: 600 * baseScale, y: 370, r: 18 });
 
-    } else if (currentLevel === 2) {
+  } else if (currentLevel === 2) {
       // Level 2: HARD - Smaller, tricky platforms with challenging gaps and heights
-      platforms.push({ x: 60 * baseScale, y: 480, w: 115, h: PLATFORM_HEIGHT });
-      platforms.push({ x: 160 * baseScale, y: 420, w: 95, h: PLATFORM_HEIGHT });
-      platforms.push({ x: 240 * baseScale, y: 370, w: 105, h: PLATFORM_HEIGHT });
-      platforms.push({ x: 340 * baseScale, y: 400, w: 85, h: PLATFORM_HEIGHT });
-      platforms.push({ x: 420 * baseScale, y: 330, w: 100, h: PLATFORM_HEIGHT });
-      platforms.push({ x: 520 * baseScale, y: 380, w: 90, h: PLATFORM_HEIGHT });
-      platforms.push({ x: 600 * baseScale, y: 330, w: 95, h: PLATFORM_HEIGHT });
-      platforms.push({ x: 700 * baseScale, y: 400, w: 110, h: PLATFORM_HEIGHT });
-      platforms.push({ x: 770 * baseScale, y: 450, w: 115, h: PLATFORM_HEIGHT });
+  platforms.push({ x: 60 * baseScale, y: 480, w: 115, h: PLATFORM_HEIGHT });
+  platforms.push({ x: 160 * baseScale, y: 420, w: 95, h: PLATFORM_HEIGHT });
+  platforms.push({ x: 240 * baseScale, y: 370, w: 105, h: PLATFORM_HEIGHT });
+  platforms.push({ x: 340 * baseScale, y: 400, w: 85, h: PLATFORM_HEIGHT });
+  platforms.push({ x: 420 * baseScale, y: 330, w: 100, h: PLATFORM_HEIGHT });
+  platforms.push({ x: 520 * baseScale, y: 380, w: 90, h: PLATFORM_HEIGHT });
+  platforms.push({ x: 600 * baseScale, y: 330, w: 95, h: PLATFORM_HEIGHT });
+  platforms.push({ x: 700 * baseScale, y: 400, w: 110, h: PLATFORM_HEIGHT });
+  platforms.push({ x: 770 * baseScale, y: 450, w: 115, h: PLATFORM_HEIGHT });
+  // Magnets
+  magnets.push({ x: 120 * baseScale, y: 470, r: 18 });
+  magnets.push({ x: 680 * baseScale, y: 410, r: 18 });
 
-    } else if (currentLevel === 3) {
+  } else if (currentLevel === 3) {
       // Level 3: EXTREME - zig-zag, high jumps, varied widths
-      platforms.push({ x: 60 * baseScale,  y: 520, w: 60,  h: PLATFORM_HEIGHT });   // Start, very narrow
-      platforms.push({ x: 160 * baseScale, y: 350, w: 180, h: PLATFORM_HEIGHT });   // Huge jump up, very wide
-      platforms.push({ x: 320 * baseScale, y: 500, w: 70,  h: PLATFORM_HEIGHT });   // Drop down, narrow
-      platforms.push({ x: 420 * baseScale, y: 320, w: 120, h: PLATFORM_HEIGHT });   // Big jump up
-      platforms.push({ x: 540 * baseScale, y: 480, w: 80,  h: PLATFORM_HEIGHT });   // Drop down
-      platforms.push({ x: 640 * baseScale, y: 300, w: 100, h: PLATFORM_HEIGHT });   // Highest platform
-      platforms.push({ x: 720 * baseScale, y: 420, w: 60,  h: PLATFORM_HEIGHT });   // Drop down, very narrow
-      platforms.push({ x: 800 * baseScale, y: 350, w: 140, h: PLATFORM_HEIGHT });   // Final wide platform
+  platforms.push({ x: 60 * baseScale,  y: 520, w: 60,  h: PLATFORM_HEIGHT });   // Start, very narrow
+  platforms.push({ x: 160 * baseScale, y: 350, w: 180, h: PLATFORM_HEIGHT });   // Huge jump up, very wide
+  platforms.push({ x: 320 * baseScale, y: 500, w: 70,  h: PLATFORM_HEIGHT });   // Drop down, narrow
+  platforms.push({ x: 420 * baseScale, y: 320, w: 120, h: PLATFORM_HEIGHT });   // Big jump up
+  platforms.push({ x: 540 * baseScale, y: 480, w: 80,  h: PLATFORM_HEIGHT });   // Drop down
+  platforms.push({ x: 640 * baseScale, y: 300, w: 100, h: PLATFORM_HEIGHT });   // Highest platform
+  platforms.push({ x: 720 * baseScale, y: 420, w: 60,  h: PLATFORM_HEIGHT });   // Drop down, very narrow
+  platforms.push({ x: 800 * baseScale, y: 350, w: 140, h: PLATFORM_HEIGHT });   // Final wide platform
+  // Magnets
+  magnets.push({ x: 320 * baseScale, y: 480, r: 18 });
+  magnets.push({ x: 700 * baseScale, y: 340, r: 18 });
   } else if (currentLevel === 4) {
       // Level 4: IMPOSSIBLE - extreme gaps, heights, and narrow bridges
-      platforms.push({ x: 50 * baseScale,  y: 540, w: 50,  h: PLATFORM_HEIGHT });   // Start, ultra-narrow
-      platforms.push({ x: 200 * baseScale, y: 320, w: 60,  h: PLATFORM_HEIGHT });   // Huge jump up, narrow
-      platforms.push({ x: 350 * baseScale, y: 520, w: 40,  h: PLATFORM_HEIGHT });   // Drop down, ultra-narrow
-      platforms.push({ x: 500 * baseScale, y: 280, w: 80,  h: PLATFORM_HEIGHT });   // Highest platform, wide
-      platforms.push({ x: 650 * baseScale, y: 500, w: 50,  h: PLATFORM_HEIGHT });   // Drop down, narrow
-      platforms.push({ x: 800 * baseScale, y: 250, w: 60,  h: PLATFORM_HEIGHT });   // Final, highest, narrow
-    } else if (currentLevel === 5) {
+  platforms.push({ x: 50 * baseScale,  y: 540, w: 50,  h: PLATFORM_HEIGHT });   // Start, ultra-narrow
+  platforms.push({ x: 200 * baseScale, y: 320, w: 60,  h: PLATFORM_HEIGHT });   // Huge jump up, narrow
+  platforms.push({ x: 350 * baseScale, y: 520, w: 40,  h: PLATFORM_HEIGHT });   // Drop down, ultra-narrow
+  platforms.push({ x: 500 * baseScale, y: 280, w: 80,  h: PLATFORM_HEIGHT });   // Highest platform, wide
+  platforms.push({ x: 650 * baseScale, y: 500, w: 50,  h: PLATFORM_HEIGHT });   // Drop down, narrow
+  platforms.push({ x: 800 * baseScale, y: 250, w: 60,  h: PLATFORM_HEIGHT });   // Final, highest, narrow
+  // Magnets
+  magnets.push({ x: 350 * baseScale, y: 500, r: 18 });
+  magnets.push({ x: 800 * baseScale, y: 230, r: 18 });
+  } else if (currentLevel === 5) {
       // Level 5: BLINKING - identical to Level 3, but platforms blink
       platforms.push({ x: 60 * baseScale,  y: 520, w: 60,  h: PLATFORM_HEIGHT });
       platforms.push({ x: 160 * baseScale, y: 350, w: 180, h: PLATFORM_HEIGHT });
@@ -173,6 +187,33 @@
       platforms.push({ x: 640 * baseScale, y: 300, w: 100, h: PLATFORM_HEIGHT });
       platforms.push({ x: 720 * baseScale, y: 420, w: 60,  h: PLATFORM_HEIGHT });
       platforms.push({ x: 800 * baseScale, y: 350, w: 140, h: PLATFORM_HEIGHT });
+      // Magnets
+      magnets.push({ x: 160 * baseScale, y: 340, r: 18 });
+      magnets.push({ x: 800 * baseScale, y: 330, r: 18 });
+    } else if (currentLevel === 6) {
+      // Level 6: New bridge pattern, moving crystals, moderate difficulty
+      platforms.push({ x: 80 * baseScale, y: 500, w: 120, h: PLATFORM_HEIGHT });
+      platforms.push({ x: 220 * baseScale, y: 420, w: 80, h: PLATFORM_HEIGHT });
+      platforms.push({ x: 340 * baseScale, y: 480, w: 100, h: PLATFORM_HEIGHT });
+      platforms.push({ x: 480 * baseScale, y: 400, w: 120, h: PLATFORM_HEIGHT });
+      platforms.push({ x: 620 * baseScale, y: 470, w: 90, h: PLATFORM_HEIGHT });
+      platforms.push({ x: 720 * baseScale, y: 350, w: 140, h: PLATFORM_HEIGHT });
+      // Magnets
+      magnets.push({ x: 220 * baseScale, y: 410, r: 18 });
+      magnets.push({ x: 620 * baseScale, y: 450, r: 18 });
+      // Moving crystals
+      for (let i = 0; i < 4; i++) {
+        crystals.push({
+          x: 200 + i * 150,
+          y: 350 + 60 * Math.sin(i),
+          r: 8,
+          hue: (180 + i * 30) % 360,
+          collected: false,
+          moving: true,
+          movePhase: i * 0.5
+        });
+      }
+    }
     }
 
   platforms.sort((a, b) => a.x - b.x);
@@ -180,34 +221,48 @@
   }
 
   function _spawnPickups() {
-    crystals.length = 0;
-    coins.length = 0;
-
-    for (let i = 0; i < platforms.length; i++) {
-      const p = platforms[i];
-
-      for (let j = 0; j < 2; j++) {
-        const offset = -40 + j * 80;
-        const coinX = Math.max(20, Math.min(width - 20, p.x + offset));
-        coins.push({
-          x: coinX,
-          y: p.y - 30,
-          r: 6,
+    if (currentLevel !== 6) {
+      crystals.length = 0;
+      coins.length = 0;
+      for (let i = 0; i < platforms.length; i++) {
+        const p = platforms[i];
+        for (let j = 0; j < 2; j++) {
+          const offset = -40 + j * 80;
+          const coinX = Math.max(20, Math.min(width - 20, p.x + offset));
+          coins.push({
+            x: coinX,
+            y: p.y - 30,
+            r: 6,
+            collected: false
+          });
+        }
+        const crystalOffset = (i % 2 === 0) ? -40 : 40;
+        const crystalX = Math.max(20, Math.min(width - 20, p.x + crystalOffset));
+        crystals.push({
+          x: crystalX,
+          y: p.y - 40,
+          r: 8,
+          hue: (180 + i * 15) % 360,
           collected: false
         });
       }
-
-      const crystalOffset = (i % 2 === 0) ? -40 : 40;
-      const crystalX = Math.max(20, Math.min(width - 20, p.x + crystalOffset));
-      crystals.push({
-        x: crystalX,
-        y: p.y - 40,
-        r: 8,
-        hue: (180 + i * 15) % 360,
-        collected: false
-      });
+    } else {
+      coins.length = 0;
+      // Level 6: coins only, crystals already spawned in _initGame
+      for (let i = 0; i < platforms.length; i++) {
+        const p = platforms[i];
+        for (let j = 0; j < 2; j++) {
+          const offset = -40 + j * 80;
+          const coinX = Math.max(20, Math.min(width - 20, p.x + offset));
+          coins.push({
+            x: coinX,
+            y: p.y - 30,
+            r: 6,
+            collected: false
+          });
+        }
+      }
     }
-
     totalCoins = coins.length;
   }
 
@@ -331,8 +386,20 @@
       player.walkTimer += dt * 2;
     }
 
+    // Magnet attraction for coins
     for (const coin of coins) {
       if (!coin.collected) {
+        let attracted = false;
+        for (const magnet of magnets) {
+          const dist = Math.hypot(coin.x - magnet.x, coin.y - magnet.y);
+          if (dist < 120) {
+            // Move coin toward magnet
+            const angle = Math.atan2(magnet.y - coin.y, magnet.x - coin.x);
+            coin.x += Math.cos(angle) * 2.5 * dt * (120 - dist) / 120;
+            coin.y += Math.sin(angle) * 2.5 * dt * (120 - dist) / 120;
+            attracted = true;
+          }
+        }
         const dx = coin.x - (player.x + player.w / 2);
         const dy = coin.y - (player.y + player.h / 2);
         if (Math.hypot(dx, dy) < coin.r + 14) {
@@ -345,6 +412,11 @@
 
     for (const crystal of crystals) {
       if (!crystal.collected) {
+        // Move crystals in Level 6
+        if (currentLevel === 6 && crystal.moving) {
+          crystal.x = 200 + 150 * (crystal.movePhase + Math.sin(performance.now() / 1000 + crystal.movePhase));
+          crystal.y = 350 + 60 * Math.sin(performance.now() / 1000 + crystal.movePhase);
+        }
         const dx = crystal.x - (player.x + player.w / 2);
         const dy = crystal.y - (player.y + player.h / 2);
         if (Math.hypot(dx, dy) < crystal.r + 14) {
@@ -374,7 +446,7 @@
       Math.abs(playerBottom - lastPlatform.y) < 8 && player.vy >= 0;
 
     if (onLastPlatform && !gameWon) {
-      if (currentLevel < 5) {
+      if (currentLevel < 6) {
         // Start flash transition to next level
         flashTransitionActive = true;
         flashTransitionTimer = 0;
@@ -384,7 +456,7 @@
           wooshSound.currentTime = 0;
           wooshSound.play();
         }
-      } else if (currentLevel === 5) {
+      } else if (currentLevel === 6) {
         gameWon = true;
       }
     }
@@ -466,6 +538,18 @@
         ctx.lineWidth = 1;
         ctx.strokeRect(p.x - p.w / 2, p.y, p.w, p.h);
       }
+    }
+    // Draw magnets
+    for (const magnet of magnets) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(magnet.x, magnet.y, magnet.r, 0, Math.PI * 2);
+      ctx.fillStyle = '#ff3333';
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.restore();
     }
 
     // Draw collectibles
