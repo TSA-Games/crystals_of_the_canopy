@@ -195,7 +195,7 @@
       magnets.push({ x: 160 * baseScale, y: 340, r: 18 });
       magnets.push({ x: 800 * baseScale, y: 330, r: 18 });
     } else if (currentLevel === 6) {
-      // Level 6: Timed challenge - reach end in 10 seconds
+      // Level 6: Timed challenge - reach end in 15 seconds
       platforms.push({ x: 80 * baseScale, y: 500, w: 120, h: PLATFORM_HEIGHT });
       platforms.push({ x: 220 * baseScale, y: 420, w: 80, h: PLATFORM_HEIGHT });
       platforms.push({ x: 340 * baseScale, y: 480, w: 100, h: PLATFORM_HEIGHT });
@@ -220,6 +220,51 @@
       }
       // Timer reset
       level6Timer = LEVEL6_TIME_LIMIT;
+    } else if (currentLevel === 7) {
+      // Level 7: Moving bridges, almost impossible structure
+      // Moving platforms: add 'moving' property and movement params
+      platforms.push({ x: 60 * baseScale, y: 540, w: 60, h: PLATFORM_HEIGHT, moving: 'x', range: 120, speed: 120 }); // Start, moves horizontally
+      platforms.push({ x: 220 * baseScale, y: 320, w: 60, h: PLATFORM_HEIGHT, moving: 'y', range: 100, speed: 100 }); // Huge jump up, moves vertically
+      platforms.push({ x: 350 * baseScale, y: 520, w: 40, h: PLATFORM_HEIGHT, moving: 'x', range: 80, speed: 140 }); // Drop down, moves horizontally
+      platforms.push({ x: 500 * baseScale, y: 280, w: 80, h: PLATFORM_HEIGHT, moving: 'y', range: 120, speed: 90 }); // Highest platform, moves vertically
+      platforms.push({ x: 650 * baseScale, y: 500, w: 50, h: PLATFORM_HEIGHT, moving: 'x', range: 100, speed: 160 }); // Drop down, moves horizontally
+      platforms.push({ x: 800 * baseScale, y: 250, w: 60, h: PLATFORM_HEIGHT, moving: 'y', range: 80, speed: 110 }); // Final, highest, moves vertically
+      // Magnets
+      magnets.push({ x: 350 * baseScale, y: 500, r: 18 });
+      magnets.push({ x: 800 * baseScale, y: 230, r: 18 });
+      // Speed boost crystals
+      crystals.length = 0;
+      for (let i = 0; i < platforms.length; i++) {
+        const p = platforms[i];
+        const crystalOffset = (i % 2 === 0) ? -40 : 40;
+        const crystalX = Math.max(20, Math.min(width - 20, p.x + crystalOffset));
+        crystals.push({
+          x: crystalX,
+          y: p.y - 40,
+          r: 8,
+          hue: (180 + i * 15) % 360,
+          collected: false
+        });
+      }
+    }
+    // Move platforms for Level 7
+    if (currentLevel === 7) {
+      for (let i = 0; i < platforms.length; i++) {
+        const p = platforms[i];
+        if (p.moving === 'x') {
+          p.x = p.baseX + Math.sin(performance.now() / 1000 * p.speed) * p.range;
+        } else if (p.moving === 'y') {
+          p.y = p.baseY + Math.sin(performance.now() / 1000 * p.speed) * p.range;
+        }
+      }
+    }
+    // Store base positions for moving platforms in Level 7
+    if (currentLevel === 7) {
+      for (let i = 0; i < platforms.length; i++) {
+        const p = platforms[i];
+        p.baseX = p.x;
+        p.baseY = p.y;
+      }
     }
 
   platforms.sort((a, b) => a.x - b.x);
