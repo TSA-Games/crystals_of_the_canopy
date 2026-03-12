@@ -101,6 +101,10 @@
   const coins = [];
   const magnets = [];
 
+  // Magnet power state
+  let magnetPowerActive = false;
+  let magnetPowerTimer = 0;
+
   let score = 0;
   let coinsCollected = 0;
   let totalCoins = 0;
@@ -134,9 +138,8 @@
   platforms.push({ x: 440 * baseScale, y: 380, w: 140, h: PLATFORM_HEIGHT });
   platforms.push({ x: 560 * baseScale, y: 390, w: 140, h: PLATFORM_HEIGHT });
   platforms.push({ x: 680 * baseScale, y: 420, w: 140, h: PLATFORM_HEIGHT });
-  // Magnets
-  magnets.push({ x: 160 * baseScale, y: 410, r: 18 });
-  magnets.push({ x: 600 * baseScale, y: 370, r: 18 });
+  // Magnets (fewer than crystals)
+  magnets.push({ x: 160 * baseScale, y: 410, r: 18, collected: false });
 
   } else if (currentLevel === 2) {
       // Level 2: HARD - Smaller, tricky platforms with challenging gaps and heights
@@ -150,8 +153,7 @@
   platforms.push({ x: 700 * baseScale, y: 400, w: 110, h: PLATFORM_HEIGHT });
   platforms.push({ x: 770 * baseScale, y: 450, w: 115, h: PLATFORM_HEIGHT });
   // Magnets
-  magnets.push({ x: 120 * baseScale, y: 470, r: 18 });
-  magnets.push({ x: 680 * baseScale, y: 410, r: 18 });
+  magnets.push({ x: 680 * baseScale, y: 410, r: 18, collected: false });
 
   } else if (currentLevel === 3) {
       // Level 3: EXTREME - zig-zag, high jumps, varied widths
@@ -164,8 +166,7 @@
   platforms.push({ x: 720 * baseScale, y: 420, w: 60,  h: PLATFORM_HEIGHT });   // Drop down, very narrow
   platforms.push({ x: 800 * baseScale, y: 350, w: 140, h: PLATFORM_HEIGHT });   // Final wide platform
   // Magnets
-  magnets.push({ x: 320 * baseScale, y: 480, r: 18 });
-  magnets.push({ x: 700 * baseScale, y: 340, r: 18 });
+  magnets.push({ x: 320 * baseScale, y: 480, r: 18, collected: false });
   } else if (currentLevel === 4) {
       // Level 4: IMPOSSIBLE - extreme gaps, heights, and narrow bridges
   platforms.push({ x: 50 * baseScale,  y: 540, w: 50,  h: PLATFORM_HEIGHT });   // Start, ultra-narrow
@@ -175,8 +176,7 @@
   platforms.push({ x: 650 * baseScale, y: 500, w: 50,  h: PLATFORM_HEIGHT });   // Drop down, narrow
   platforms.push({ x: 800 * baseScale, y: 250, w: 60,  h: PLATFORM_HEIGHT });   // Final, highest, narrow
   // Magnets
-  magnets.push({ x: 350 * baseScale, y: 500, r: 18 });
-  magnets.push({ x: 800 * baseScale, y: 230, r: 18 });
+  magnets.push({ x: 800 * baseScale, y: 230, r: 18, collected: false });
   } else if (currentLevel === 5) {
       // Level 5: BLINKING - identical to Level 3, but platforms blink
       platforms.push({ x: 60 * baseScale,  y: 520, w: 60,  h: PLATFORM_HEIGHT });
@@ -187,9 +187,8 @@
       platforms.push({ x: 640 * baseScale, y: 300, w: 100, h: PLATFORM_HEIGHT });
       platforms.push({ x: 720 * baseScale, y: 420, w: 60,  h: PLATFORM_HEIGHT });
       platforms.push({ x: 800 * baseScale, y: 350, w: 140, h: PLATFORM_HEIGHT });
-      // Magnets
-      magnets.push({ x: 160 * baseScale, y: 340, r: 18 });
-      magnets.push({ x: 800 * baseScale, y: 330, r: 18 });
+  // Magnets
+  magnets.push({ x: 800 * baseScale, y: 330, r: 18, collected: false });
     } else if (currentLevel === 6) {
       // Level 6: New bridge pattern, moving crystals, moderate difficulty
       platforms.push({ x: 80 * baseScale, y: 500, w: 120, h: PLATFORM_HEIGHT });
@@ -198,9 +197,8 @@
       platforms.push({ x: 480 * baseScale, y: 400, w: 120, h: PLATFORM_HEIGHT });
       platforms.push({ x: 620 * baseScale, y: 470, w: 90, h: PLATFORM_HEIGHT });
       platforms.push({ x: 720 * baseScale, y: 350, w: 140, h: PLATFORM_HEIGHT });
-      // Magnets
-      magnets.push({ x: 220 * baseScale, y: 410, r: 18 });
-      magnets.push({ x: 620 * baseScale, y: 450, r: 18 });
+  // Magnets
+  magnets.push({ x: 220 * baseScale, y: 410, r: 18, collected: false });
       // Moving crystals
       for (let i = 0; i < 4; i++) {
         crystals.push({
@@ -262,7 +260,9 @@
         }
       }
     }
-    totalCoins = coins.length;
+  totalCoins = coins.length;
+  magnetPowerActive = false;
+  magnetPowerTimer = 0;
   }
 
   function _resetPlayer() {
@@ -385,18 +385,17 @@
       player.walkTimer += dt * 2;
     }
 
-    // Magnet attraction for coins
+    // Magnet power: attract coins to player
     for (const coin of coins) {
       if (!coin.collected) {
-        let attracted = false;
-        for (const magnet of magnets) {
-          const dist = Math.hypot(coin.x - magnet.x, coin.y - magnet.y);
-          if (dist < 120) {
-            // Move coin toward magnet
-            const angle = Math.atan2(magnet.y - coin.y, magnet.x - coin.x);
-            coin.x += Math.cos(angle) * 2.5 * dt * (120 - dist) / 120;
-            coin.y += Math.sin(angle) * 2.5 * dt * (120 - dist) / 120;
-            attracted = true;
+        if (magnetPowerActive) {
+          const px = player.x + player.w / 2;
+          const py = player.y + player.h / 2;
+          const dist = Math.hypot(coin.x - px, coin.y - py);
+          if (dist < 200) {
+            const angle = Math.atan2(py - coin.y, px - coin.x);
+            coin.x += Math.cos(angle) * 4.5 * dt * (200 - dist) / 200;
+            coin.y += Math.sin(angle) * 4.5 * dt * (200 - dist) / 200;
           }
         }
         const dx = coin.x - (player.x + player.w / 2);
@@ -406,6 +405,28 @@
           coinsCollected++;
           score += COIN_POINTS;
         }
+      }
+    }
+
+    // Magnet collection
+    for (const magnet of magnets) {
+      if (!magnet.collected) {
+        const dx = magnet.x - (player.x + player.w / 2);
+        const dy = magnet.y - (player.y + player.h / 2);
+        if (Math.hypot(dx, dy) < magnet.r + 18) {
+          magnet.collected = true;
+          magnetPowerActive = true;
+          magnetPowerTimer = 1.5;
+        }
+      }
+    }
+
+    // Magnet power timer
+    if (magnetPowerActive) {
+      magnetPowerTimer -= dt;
+      if (magnetPowerTimer <= 0) {
+        magnetPowerActive = false;
+        magnetPowerTimer = 0;
       }
     }
 
@@ -540,14 +561,26 @@
     }
     // Draw magnets
     for (const magnet of magnets) {
+      if (!magnet.collected) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(magnet.x, magnet.y, magnet.r, 0, Math.PI * 2);
+        ctx.fillStyle = '#ff3333';
+        ctx.fill();
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+    // Magnet power indicator
+    if (magnetPowerActive) {
       ctx.save();
-      ctx.beginPath();
-      ctx.arc(magnet.x, magnet.y, magnet.r, 0, Math.PI * 2);
+      ctx.globalAlpha = 0.25;
       ctx.fillStyle = '#ff3333';
+      ctx.beginPath();
+      ctx.arc(player.x + player.w / 2, player.y + player.h / 2, 60, 0, Math.PI * 2);
       ctx.fill();
-      ctx.strokeStyle = '#fff';
-      ctx.lineWidth = 2;
-      ctx.stroke();
       ctx.restore();
     }
 
