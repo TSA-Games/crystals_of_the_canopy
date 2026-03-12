@@ -139,12 +139,12 @@
       platforms.push({ x: 560 * baseScale, y: 390, w: 140, h: PLATFORM_HEIGHT });
       platforms.push({ x: 680 * baseScale, y: 420, w: 140, h: PLATFORM_HEIGHT });
       // Place magnets on bridges
-  const magnetIndices1 = [1, 4];
-  for (const idx of magnetIndices1) {
-        if (platforms[idx]) {
-          magnets.push({ x: platforms[idx].x, y: platforms[idx].y - 10, r: 18, collected: false });
-        }
-      }
+    platforms.push({ x: 50 * baseScale,  y: 540, w: 50,  h: PLATFORM_HEIGHT });   // Start, ultra-narrow
+    platforms.push({ x: 200 * baseScale, y: 320, w: 60,  h: PLATFORM_HEIGHT });   // Huge jump up, narrow
+    platforms.push({ x: 350 * baseScale, y: 520, w: 40,  h: PLATFORM_HEIGHT });   // Drop down, ultra-narrow
+    platforms.push({ x: 500 * baseScale, y: 280, w: 80,  h: PLATFORM_HEIGHT });   // Highest platform, wide
+    platforms.push({ x: 650 * baseScale, y: 500, w: 50,  h: PLATFORM_HEIGHT });   // Drop down, narrow
+    platforms.push({ x: 800 * baseScale, y: 250, w: 60,  h: PLATFORM_HEIGHT });   // Final, highest, narrow
 
   } else if (currentLevel === 2) {
       // Level 2: HARD - Smaller, tricky platforms with challenging gaps and heights
