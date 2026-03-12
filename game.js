@@ -213,8 +213,7 @@
           movePhase: i * 0.5
         });
       }
-    }
-    }
+  }
 
   platforms.sort((a, b) => a.x - b.x);
   _spawnPickups();
