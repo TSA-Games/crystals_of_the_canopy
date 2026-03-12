@@ -305,9 +305,14 @@
     player.jumpBufferCounter = 0;
     player.speedBoostActive = false;
     player.speedBoostTimer = 0;
+    // Reset coins for current level only
+    for (const coin of coins) {
+      coin.collected = false;
+    }
     coinsCollected = 0;
     gameWon = false;
-    _spawnPickups();
+    // Do not reset score or other pickups
+    // Do not respawn all pickups, just reset coin state
   }
 
   // Initialize once, then hook resize
