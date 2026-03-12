@@ -631,16 +631,25 @@
       const blinkTime = (performance.now() / 1000) % blinkPeriod;
       blinkOn = blinkTime < blinkPeriod / 2;
     }
-    for (const p of platforms) {
-      if (currentLevel !== 5 || blinkOn) {
-        ctx.fillStyle = '#8b7355';
-        ctx.fillRect(p.x - p.w / 2, p.y, p.w, p.h);
+      for (const platform of platforms) {
+        ctx.save();
         ctx.fillStyle = '#654321';
-        ctx.fillRect(p.x - p.w / 2, p.y + p.h, p.w, 2);
-        ctx.strokeStyle = '#a0826d';
-        ctx.lineWidth = 1;
-        ctx.strokeRect(p.x - p.w / 2, p.y, p.w, p.h);
-      }
+        ctx.strokeStyle = '#222';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        // For moving platforms, use current x/y
+        let px = platform.x;
+        let py = platform.y;
+        if (platform.moving === 'x' && platform.baseX !== undefined) {
+          px = platform.x;
+        }
+        if (platform.moving === 'y' && platform.baseY !== undefined) {
+          py = platform.y;
+        }
+        ctx.rect(px - platform.w / 2, py, platform.w, platform.h);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
     }
     // Draw magnets
     for (const magnet of magnets) {
