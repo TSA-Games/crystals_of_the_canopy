@@ -204,6 +204,20 @@
       platforms.push({ x: 720 * baseScale, y: 350, w: 140, h: PLATFORM_HEIGHT });
       // Magnets
       magnets.push({ x: 220 * baseScale, y: 410, r: 18 });
+      // Speed boost crystals
+      crystals.length = 0;
+      for (let i = 0; i < platforms.length; i++) {
+        const p = platforms[i];
+        const crystalOffset = (i % 2 === 0) ? -40 : 40;
+        const crystalX = Math.max(20, Math.min(width - 20, p.x + crystalOffset));
+        crystals.push({
+          x: crystalX,
+          y: p.y - 40,
+          r: 8,
+          hue: (180 + i * 15) % 360,
+          collected: false
+        });
+      }
       // Timer reset
       level6Timer = LEVEL6_TIME_LIMIT;
     }
