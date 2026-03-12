@@ -232,6 +232,12 @@
       platforms.push({ x: 800 * baseScale, y: 180, w: 100, h: PLATFORM_HEIGHT, moving: 'x', range: 160, speed: 1.2 }); // Final, moves horizontally
       platforms.push({ x: 400 * baseScale, y: 520, w: 60, h: PLATFORM_HEIGHT, moving: 'y', range: 120, speed: 1.7 }); // Extra, moves vertically
       platforms.push({ x: 600 * baseScale, y: 400, w: 80, h: PLATFORM_HEIGHT, moving: 'x', range: 100, speed: 1.5 }); // Extra, moves horizontally
+      // Store base positions for moving platforms
+      for (let i = 0; i < platforms.length; i++) {
+        const p = platforms[i];
+        p.baseX = p.x;
+        p.baseY = p.y;
+      }
       // Magnets
       magnets.push({ x: 320 * baseScale, y: 420, r: 18 });
       magnets.push({ x: 800 * baseScale, y: 180, r: 18 });
@@ -248,26 +254,6 @@
           hue: (180 + i * 15) % 360,
           collected: false
         });
-      }
-    }
-    // Move platforms for Level 7
-    if (currentLevel === 7) {
-      for (let i = 0; i < platforms.length; i++) {
-        const p = platforms[i];
-        if (p.moving === 'x') {
-          p.x = p.baseX + Math.sin(performance.now() / 1000 * p.speed) * p.range;
-        } else if (p.moving === 'y') {
-          p.y = p.baseY + Math.sin(performance.now() / 1000 * p.speed) * p.range;
-        }
-      }
-    }
-    // No invisible bridges or road logic; player falls if not on platform, as in other levels
-    // Store base positions for moving platforms in Level 7
-    if (currentLevel === 7) {
-      for (let i = 0; i < platforms.length; i++) {
-        const p = platforms[i];
-        p.baseX = p.x;
-        p.baseY = p.y;
       }
     }
 
@@ -400,6 +386,19 @@
   // ============================================================================
   function _update(dt) {
     if (flashTransitionActive) return; // Pause gameplay during flash
+    
+    // Move platforms for Level 7 (each frame)
+    if (currentLevel === 7) {
+      for (let i = 0; i < platforms.length; i++) {
+        const p = platforms[i];
+        if (p.moving === 'x' && p.baseX !== undefined) {
+          p.x = p.baseX + Math.sin(performance.now() / 1000 * p.speed) * p.range;
+        } else if (p.moving === 'y' && p.baseY !== undefined) {
+          p.y = p.baseY + Math.sin(performance.now() / 1000 * p.speed) * p.range;
+        }
+      }
+    }
+    
     const moveLeft = keys['ArrowLeft'] || keys['a'];
     const moveRight = keys['ArrowRight'] || keys['d'];
     const jumpKey = keys['ArrowUp'] || keys['w'] || keys['Space'] || keys['Spacebar'] || keys[' '];
