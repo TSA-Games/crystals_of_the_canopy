@@ -581,6 +581,20 @@
       player.y = pTop - player.h;
       player.vy = 0;
       player.onGround = true;
+      
+      // If player lands on a moving platform in Level 7, move player with it
+      if (currentLevel === 7 && (platform.moving === 'x' || platform.moving === 'y')) {
+        // Calculate platform velocity based on its movement
+        if (platform.moving === 'x' && platform.baseX !== undefined) {
+          const prevX = platform.baseX + Math.sin((performance.now() - 16) / 1000 * platform.speed) * platform.range;
+          const currX = platform.x;
+          player.x += (currX - prevX);
+        } else if (platform.moving === 'y' && platform.baseY !== undefined) {
+          const prevY = platform.baseY + Math.sin((performance.now() - 16) / 1000 * platform.speed) * platform.range;
+          const currY = platform.y;
+          player.y += (currY - prevY);
+        }
+      }
       return;
     }
 
