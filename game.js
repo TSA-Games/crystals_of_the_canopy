@@ -486,7 +486,7 @@
       if (!coin.collected) {
         let attracted = false;
         // Magnet power: increase reach
-        let magnetRadius = player.magnetActive ? 240 : 120;
+  let magnetRadius = player.magnetActive ? 300 : 120;
         for (const magnet of magnets) {
           if (!magnet.collected) {
             const dist = Math.hypot(coin.x - magnet.x, coin.y - magnet.y);
@@ -517,7 +517,7 @@
         if (Math.hypot(dx, dy) < magnet.r + 14) {
           magnet.collected = true;
           player.magnetActive = true;
-          player.magnetTimer = 2.0;
+          player.magnetTimer = 3.0;
         }
       }
     }
