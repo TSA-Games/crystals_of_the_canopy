@@ -764,8 +764,14 @@
     }
 
 
-    // Status bars for powerups
-    let barX = 16, barY = 76, barW = 180, barH = 16, pad = 8;
+    // Status bars for powerups - top center
+    let barW = 180, barH = 16, pad = 8;
+    let totalBars = (player.speedBoostActive ? 1 : 0) + (player.magnetActive ? 1 : 0);
+    let barsDrawn = 0;
+    let startY = 16; // distance from top
+    let totalHeight = totalBars * barH + (totalBars > 1 ? (totalBars - 1) * pad : 0);
+    let barX = Math.floor((width - barW) / 2);
+    let barY = startY + Math.floor((0.5 * (60 - totalHeight))); // center in 60px region
     if (player.speedBoostActive) {
       ctx.fillStyle = '#222';
       ctx.fillRect(barX, barY, barW, barH);
@@ -778,8 +784,10 @@
       ctx.font = 'bold 13px Arial';
       ctx.fillStyle = '#fff';
       ctx.textBaseline = 'middle';
+      ctx.textAlign = 'left';
       ctx.fillText('⚡ SPEED BOOST', barX + 8, barY + barH / 2);
       barY += barH + pad;
+      barsDrawn++;
     }
     if (player.magnetActive) {
       ctx.fillStyle = '#222';
@@ -793,7 +801,10 @@
       ctx.font = 'bold 13px Arial';
       ctx.fillStyle = '#fff';
       ctx.textBaseline = 'middle';
+      ctx.textAlign = 'left';
       ctx.fillText('🧲 MAGNET POWER', barX + 8, barY + barH / 2);
+      barY += barH + pad;
+      barsDrawn++;
     }
 
     ctx.fillStyle = '#aaa';
