@@ -1,12 +1,3 @@
-  // Magnet power state
-  player.magnetActive = false;
-  player.magnetTimer = 0;
-  // Reset magnet power
-  player.magnetActive = false;
-  player.magnetTimer = 0;
-  for (const magnet of magnets) magnet.collected = false;
-  // Track points earned in current level
-  let levelScore = 0;
 // Crystals of the Canopy - Professional Platformer Game (patched)
 // Corrected: removed background image, fixed brace, added Level 3
 
@@ -99,7 +90,9 @@
     coyoteCounter: 0,
     jumpBufferCounter: 0,
     speedBoostActive: false,
-    speedBoostTimer: 0
+    speedBoostTimer: 0,
+    magnetActive: false,
+    magnetTimer: 0
   };
 
   // ============================================================================
@@ -115,6 +108,7 @@
   let totalCoins = 0;
   let gameWon = false;
   let currentLevel = 1;
+  let levelScore = 0;
 
   // Level 6 timer
   let level6Timer = 15;
