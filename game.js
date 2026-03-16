@@ -1,3 +1,5 @@
+  // Track points earned in current level
+  let levelScore = 0;
 // Crystals of the Canopy - Professional Platformer Game (patched)
 // Corrected: removed background image, fixed brace, added Level 3
 
@@ -317,11 +319,14 @@
     player.jumpBufferCounter = 0;
     player.speedBoostActive = false;
     player.speedBoostTimer = 0;
-      // Reset coins/crystals for current level
-      for (const coin of coins) coin.collected = false;
-      for (const crystal of crystals) crystal.collected = false;
-      coinsCollected = 0;
-      totalCoins = coins.length;
+  // Reset coins/crystals for current level
+  for (const coin of coins) coin.collected = false;
+  for (const crystal of crystals) crystal.collected = false;
+  coinsCollected = 0;
+  totalCoins = coins.length;
+  // Reset points earned in this level
+  score -= levelScore;
+  levelScore = 0;
       if (currentLevel === 6) {
         // Respawn crystals for Level 6
         crystals.length = 0;
@@ -491,6 +496,7 @@
           coin.collected = true;
           coinsCollected++;
           score += COIN_POINTS;
+          levelScore += COIN_POINTS;
         }
       }
     }
@@ -509,6 +515,7 @@
           player.speedBoostActive = true;
           player.speedBoostTimer = SPEED_BOOST_DURATION;
           score += CRYSTAL_POINTS;
+          levelScore += CRYSTAL_POINTS;
         }
       }
     }
