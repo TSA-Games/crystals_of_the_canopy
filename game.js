@@ -486,16 +486,24 @@
       if (!coin.collected) {
         let magnetRadius = player.magnetActive ? 300 : 120;
         let collected = false;
-        // If magnet power is active, instantly collect coins within radius
+        // If magnet power is active, pull coins in very fast
         if (player.magnetActive) {
-          const dx = coin.x - (player.x + player.w / 2);
-          const dy = coin.y - (player.y + player.h / 2);
-          if (Math.hypot(dx, dy) < magnetRadius) {
-            coin.collected = true;
-            coinsCollected++;
-            score += COIN_POINTS;
-            levelScore += COIN_POINTS;
-            collected = true;
+          const dx = (player.x + player.w / 2) - coin.x;
+          const dy = (player.y + player.h / 2) - coin.y;
+          const dist = Math.hypot(dx, dy);
+          if (dist < magnetRadius) {
+            // Pull coin toward player very quickly
+            const angle = Math.atan2(dy, dx);
+            const pullSpeed = 1200 * dt * (magnetRadius - dist) / magnetRadius; // much faster
+            coin.x += Math.cos(angle) * Math.min(pullSpeed, dist);
+            coin.y += Math.sin(angle) * Math.min(pullSpeed, dist);
+            if (dist < coin.r + 14) {
+              coin.collected = true;
+              coinsCollected++;
+              score += COIN_POINTS;
+              levelScore += COIN_POINTS;
+              collected = true;
+            }
           }
         }
         // Otherwise, normal collection by touch
