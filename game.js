@@ -691,17 +691,38 @@
         ctx.strokeRect(p.x - p.w / 2, p.y, p.w, p.h);
       }
     }
-    // Draw magnets
+    // Draw magnets as U-shaped
     for (const magnet of magnets) {
       if (!magnet.collected) {
         ctx.save();
+        // Outer arc (U body)
         ctx.beginPath();
-        ctx.arc(magnet.x, magnet.y, magnet.r, 0, Math.PI * 2);
-        ctx.fillStyle = '#ff3333';
-        ctx.fill();
-        ctx.strokeStyle = '#fff';
-        ctx.lineWidth = 2;
+        ctx.arc(magnet.x, magnet.y, magnet.r, Math.PI * 0.15, Math.PI * 1.85, false);
+        ctx.lineWidth = magnet.r * 0.5;
+        ctx.strokeStyle = '#ff3333';
+        ctx.shadowColor = '#fff';
+        ctx.shadowBlur = 2;
         ctx.stroke();
+        ctx.shadowBlur = 0;
+        // Inner arc (U gap)
+        ctx.beginPath();
+        ctx.arc(magnet.x, magnet.y, magnet.r * 0.65, Math.PI * 0.15, Math.PI * 1.85, false);
+        ctx.lineWidth = magnet.r * 0.5 - 2;
+        ctx.strokeStyle = '#222';
+        ctx.stroke();
+        // Poles (rectangles at ends)
+        let poleW = magnet.r * 0.35;
+        let poleH = magnet.r * 0.32;
+        let angle1 = Math.PI * 0.15;
+        let angle2 = Math.PI * 1.85;
+        let x1 = magnet.x + Math.cos(angle1) * magnet.r * 0.98 - poleW / 2;
+        let y1 = magnet.y + Math.sin(angle1) * magnet.r * 0.98;
+        let x2 = magnet.x + Math.cos(angle2) * magnet.r * 0.98 - poleW / 2;
+        let y2 = magnet.y + Math.sin(angle2) * magnet.r * 0.98;
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(x1, y1, poleW, poleH);
+        ctx.fillStyle = '#00bfff';
+        ctx.fillRect(x2, y2, poleW, poleH);
         ctx.restore();
       }
     }
