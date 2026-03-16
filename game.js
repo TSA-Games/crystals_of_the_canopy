@@ -1,3 +1,10 @@
+  // Magnet power state
+  player.magnetActive = false;
+  player.magnetTimer = 0;
+  // Reset magnet power
+  player.magnetActive = false;
+  player.magnetTimer = 0;
+  for (const magnet of magnets) magnet.collected = false;
   // Track points earned in current level
   let levelScore = 0;
 // Crystals of the Canopy - Professional Platformer Game (patched)
@@ -370,6 +377,7 @@
           if (flashTransitionNextLevel <= 7) {
             currentLevel = flashTransitionNextLevel;
             gameWon = false;
+            levelScore = 0;
             _resetPlayer();
             _initGame();
           } else {
@@ -480,14 +488,18 @@
     for (const coin of coins) {
       if (!coin.collected) {
         let attracted = false;
+        // Magnet power: increase reach
+        let magnetRadius = player.magnetActive ? 240 : 120;
         for (const magnet of magnets) {
-          const dist = Math.hypot(coin.x - magnet.x, coin.y - magnet.y);
-          if (dist < 120) {
-            // Move coin toward magnet
-            const angle = Math.atan2(magnet.y - coin.y, magnet.x - coin.x);
-            coin.x += Math.cos(angle) * 2.5 * dt * (120 - dist) / 120;
-            coin.y += Math.sin(angle) * 2.5 * dt * (120 - dist) / 120;
-            attracted = true;
+          if (!magnet.collected) {
+            const dist = Math.hypot(coin.x - magnet.x, coin.y - magnet.y);
+            if (dist < magnetRadius) {
+              // Move coin toward magnet
+              const angle = Math.atan2(magnet.y - coin.y, magnet.x - coin.x);
+              coin.x += Math.cos(angle) * 2.5 * dt * (magnetRadius - dist) / magnetRadius;
+              coin.y += Math.sin(angle) * 2.5 * dt * (magnetRadius - dist) / magnetRadius;
+              attracted = true;
+            }
           }
         }
         const dx = coin.x - (player.x + player.w / 2);
@@ -498,6 +510,26 @@
           score += COIN_POINTS;
           levelScore += COIN_POINTS;
         }
+      }
+    }
+    // Magnet collect logic
+    for (const magnet of magnets) {
+      if (!magnet.collected) {
+        const dx = magnet.x - (player.x + player.w / 2);
+        const dy = magnet.y - (player.y + player.h / 2);
+        if (Math.hypot(dx, dy) < magnet.r + 14) {
+          magnet.collected = true;
+          player.magnetActive = true;
+          player.magnetTimer = 2.0;
+        }
+      }
+    }
+    // Magnet timer
+    if (player.magnetActive) {
+      player.magnetTimer -= dt;
+      if (player.magnetTimer <= 0) {
+        player.magnetActive = false;
+        player.magnetTimer = 0;
       }
     }
 
