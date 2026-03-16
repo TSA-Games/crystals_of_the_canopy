@@ -320,9 +320,12 @@
     player.jumpBufferCounter = 0;
     player.speedBoostActive = false;
     player.speedBoostTimer = 0;
+    player.magnetActive = false;
+    player.magnetTimer = 0;
   // Reset coins/crystals for current level
   for (const coin of coins) coin.collected = false;
   for (const crystal of crystals) crystal.collected = false;
+  for (const magnet of magnets) magnet.collected = false;
   coinsCollected = 0;
   totalCoins = coins.length;
   // Reset points earned in this level
@@ -690,15 +693,17 @@
     }
     // Draw magnets
     for (const magnet of magnets) {
-      ctx.save();
-      ctx.beginPath();
-      ctx.arc(magnet.x, magnet.y, magnet.r, 0, Math.PI * 2);
-      ctx.fillStyle = '#ff3333';
-      ctx.fill();
-      ctx.strokeStyle = '#fff';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-      ctx.restore();
+      if (!magnet.collected) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(magnet.x, magnet.y, magnet.r, 0, Math.PI * 2);
+        ctx.fillStyle = '#ff3333';
+        ctx.fill();
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.restore();
+      }
     }
 
     // Draw collectibles
@@ -731,6 +736,12 @@
       ctx.fillStyle = '#ff6b6b';
       ctx.font = `bold 14px Arial`;
       ctx.fillText(`⚡ SPEED BOOST! ${player.speedBoostTimer.toFixed(1)}s`, 16, 76);
+    }
+
+    if (player.magnetActive) {
+      ctx.fillStyle = '#ff3333';
+      ctx.font = `bold 14px Arial`;
+      ctx.fillText(`🧲 MAGNET POWER! ${player.magnetTimer.toFixed(1)}s`, 16, player.speedBoostActive ? 96 : 76);
     }
 
     ctx.fillStyle = '#aaa';
