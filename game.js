@@ -484,28 +484,30 @@
     // Magnet attraction for coins
     for (const coin of coins) {
       if (!coin.collected) {
-        let attracted = false;
-        // Magnet power: increase reach
-  let magnetRadius = player.magnetActive ? 300 : 120;
-        for (const magnet of magnets) {
-          if (!magnet.collected) {
-            const dist = Math.hypot(coin.x - magnet.x, coin.y - magnet.y);
-            if (dist < magnetRadius) {
-              // Move coin toward magnet
-              const angle = Math.atan2(magnet.y - coin.y, magnet.x - coin.x);
-              coin.x += Math.cos(angle) * 2.5 * dt * (magnetRadius - dist) / magnetRadius;
-              coin.y += Math.sin(angle) * 2.5 * dt * (magnetRadius - dist) / magnetRadius;
-              attracted = true;
-            }
+        let magnetRadius = player.magnetActive ? 300 : 120;
+        let collected = false;
+        // If magnet power is active, instantly collect coins within radius
+        if (player.magnetActive) {
+          const dx = coin.x - (player.x + player.w / 2);
+          const dy = coin.y - (player.y + player.h / 2);
+          if (Math.hypot(dx, dy) < magnetRadius) {
+            coin.collected = true;
+            coinsCollected++;
+            score += COIN_POINTS;
+            levelScore += COIN_POINTS;
+            collected = true;
           }
         }
-        const dx = coin.x - (player.x + player.w / 2);
-        const dy = coin.y - (player.y + player.h / 2);
-        if (Math.hypot(dx, dy) < coin.r + 14) {
-          coin.collected = true;
-          coinsCollected++;
-          score += COIN_POINTS;
-          levelScore += COIN_POINTS;
+        // Otherwise, normal collection by touch
+        if (!collected) {
+          const dx = coin.x - (player.x + player.w / 2);
+          const dy = coin.y - (player.y + player.h / 2);
+          if (Math.hypot(dx, dy) < coin.r + 14) {
+            coin.collected = true;
+            coinsCollected++;
+            score += COIN_POINTS;
+            levelScore += COIN_POINTS;
+          }
         }
       }
     }
