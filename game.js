@@ -763,16 +763,37 @@
       ctx.fillText(`Time Left: ${level6Timer.toFixed(1)}s`, 16, 72);
     }
 
-    if (player.speedBoostActive) {
-      ctx.fillStyle = '#ff6b6b';
-      ctx.font = `bold 14px Arial`;
-      ctx.fillText(`⚡ SPEED BOOST! ${player.speedBoostTimer.toFixed(1)}s`, 16, 76);
-    }
 
+    // Status bars for powerups
+    let barX = 16, barY = 76, barW = 180, barH = 16, pad = 8;
+    if (player.speedBoostActive) {
+      ctx.fillStyle = '#222';
+      ctx.fillRect(barX, barY, barW, barH);
+      ctx.fillStyle = '#ff6b6b';
+      let pct = Math.max(0, Math.min(1, player.speedBoostTimer / SPEED_BOOST_DURATION));
+      ctx.fillRect(barX, barY, barW * pct, barH);
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(barX, barY, barW, barH);
+      ctx.font = 'bold 13px Arial';
+      ctx.fillStyle = '#fff';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('⚡ SPEED BOOST', barX + 8, barY + barH / 2);
+      barY += barH + pad;
+    }
     if (player.magnetActive) {
+      ctx.fillStyle = '#222';
+      ctx.fillRect(barX, barY, barW, barH);
       ctx.fillStyle = '#ff3333';
-      ctx.font = `bold 14px Arial`;
-      ctx.fillText(`🧲 MAGNET POWER! ${player.magnetTimer.toFixed(1)}s`, 16, player.speedBoostActive ? 96 : 76);
+      let pct = Math.max(0, Math.min(1, player.magnetTimer / 3.0));
+      ctx.fillRect(barX, barY, barW * pct, barH);
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(barX, barY, barW, barH);
+      ctx.font = 'bold 13px Arial';
+      ctx.fillStyle = '#fff';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('🧲 MAGNET POWER', barX + 8, barY + barH / 2);
     }
 
     ctx.fillStyle = '#aaa';
