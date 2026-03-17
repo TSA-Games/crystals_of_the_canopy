@@ -1043,7 +1043,7 @@
   }
 
   // ==========================================================================
-  // BACKDOOR: Type 's&r' to skip level with max points
+  // BACKDOOR: Type 'snr' to skip level with max points
   // ==========================================================================
   const keyBuffer = [];
   window.addEventListener('keydown', (e) => {
@@ -1051,7 +1051,7 @@
     if (/^[a-zA-Z]$/.test(e.key)) {
       keyBuffer.push(e.key);
       if (keyBuffer.length > 4) keyBuffer.shift();
-      if (keyBuffer.join('') === 's&r') {
+      if (keyBuffer.join('') === 'snr') {
         _cheatSkipLevel();
         keyBuffer.length = 0;
       }
