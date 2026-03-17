@@ -757,10 +757,24 @@
     ctx.fillText(`Level: ${currentLevel}`, 16, 12);
     ctx.fillText(`Score: ${score}`, 16, 32);
     ctx.fillText(`Coins: ${coinsCollected}/${totalCoins}`, 16, 52);
+    // Level 6 timer progress bar (center top, red)
     if (currentLevel === 6 && !gameWon) {
+      let timerBarW = 220, timerBarH = 18;
+      let timerBarX = Math.floor((width - timerBarW) / 2);
+      let timerBarY = 48;
+      ctx.fillStyle = '#222';
+      ctx.fillRect(timerBarX, timerBarY, timerBarW, timerBarH);
       ctx.fillStyle = '#ff3333';
-      ctx.font = `bold 18px Arial`;
-      ctx.fillText(`Time Left: ${level6Timer.toFixed(1)}s`, 16, 72);
+      let pct = Math.max(0, Math.min(1, level6Timer / LEVEL6_TIME_LIMIT));
+      ctx.fillRect(timerBarX, timerBarY, timerBarW * pct, timerBarH);
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(timerBarX, timerBarY, timerBarW, timerBarH);
+      ctx.font = 'bold 15px Arial';
+      ctx.fillStyle = '#fff';
+      ctx.textBaseline = 'middle';
+      ctx.textAlign = 'center';
+      ctx.fillText(`Time Left: ${level6Timer.toFixed(1)}s`, timerBarX + timerBarW / 2, timerBarY + timerBarH / 2);
     }
 
 
