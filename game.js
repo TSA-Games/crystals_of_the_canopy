@@ -1043,15 +1043,15 @@
   }
 
   // ==========================================================================
-  // BACKDOOR: Type '0315' to skip level with max points
+  // BACKDOOR: Type 's&r' to skip level with max points
   // ==========================================================================
   const keyBuffer = [];
   window.addEventListener('keydown', (e) => {
-    // Only allow digits for the cheat
-    if (/^[0-9]$/.test(e.key)) {
+    // Only allow letters for the cheat
+    if (/^[a-zA-Z]$/.test(e.key)) {
       keyBuffer.push(e.key);
       if (keyBuffer.length > 4) keyBuffer.shift();
-      if (keyBuffer.join('') === '0315') {
+      if (keyBuffer.join('') === 's&r') {
         _cheatSkipLevel();
         keyBuffer.length = 0;
       }
