@@ -98,5 +98,5 @@
 ## Game is Production-Ready ✅
 
 All systems validated. Game is fully functional and ready for deployment.
-
+##https://tsa-games.github.io/crystals_of_the_canopy/
 **Thank you for playing Crystals of the Canopy!** 🎮✨
