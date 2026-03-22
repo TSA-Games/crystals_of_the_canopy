@@ -387,7 +387,9 @@
       _update(dt);
     }
     _render();
-    requestAnimationFrame(gameLoop);
+    if (!gameWon) {
+      requestAnimationFrame(gameLoop);
+    }
   }
   requestAnimationFrame(gameLoop);
 
