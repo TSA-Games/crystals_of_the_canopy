@@ -119,8 +119,8 @@
   let flashTransitionTimer = 0;
   let flashTransitionNextLevel = null;
 
-  // Woosh sound effect
-  const wooshSound = new Audio('sounds/woosh.mp3');
+  // Swoosh sound effect
+  const wooshSound = new Audio('sounds/swoosh.mp3');
   wooshSound.volume = 0.7;
 
   // ============================================================================
