@@ -502,6 +502,10 @@
               coinsCollected++;
               score += COIN_POINTS;
               levelScore += COIN_POINTS;
+              if (wooshSound) {
+                wooshSound.currentTime = 0;
+                wooshSound.play();
+              }
               collected = true;
             }
           }
@@ -515,6 +519,10 @@
             coinsCollected++;
             score += COIN_POINTS;
             levelScore += COIN_POINTS;
+            if (wooshSound) {
+              wooshSound.currentTime = 0;
+              wooshSound.play();
+            }
           }
         }
       }
