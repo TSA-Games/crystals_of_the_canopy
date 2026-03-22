@@ -502,10 +502,9 @@
               coinsCollected++;
               score += COIN_POINTS;
               levelScore += COIN_POINTS;
-              if (wooshSound) {
-                wooshSound.currentTime = 0;
-                wooshSound.play();
-              }
+              const coinSound = new Audio('sounds/swoosh.mp3');
+              coinSound.volume = 0.7;
+              coinSound.play();
               collected = true;
             }
           }
@@ -519,10 +518,9 @@
             coinsCollected++;
             score += COIN_POINTS;
             levelScore += COIN_POINTS;
-            if (wooshSound) {
-              wooshSound.currentTime = 0;
-              wooshSound.play();
-            }
+            const coinSound = new Audio('sounds/swoosh.mp3');
+            coinSound.volume = 0.7;
+            coinSound.play();
           }
         }
       }
