@@ -128,6 +128,7 @@
   // GAME INITIALIZATION
   // ============================================================================
   function _initGame() {
+  lives = 5; // Reset lives at the start of each level
     platforms.length = 0;
     crystals.length = 0;
     coins.length = 0;
