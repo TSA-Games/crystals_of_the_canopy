@@ -314,12 +314,10 @@
 
   function _resetPlayer() {
     // Always spawn above the leftmost platform (bridge)
-    let leftmost = platforms[0];
-    for (const p of platforms) {
-      if (p.x < leftmost.x) leftmost = p;
-    }
-    player.x = leftmost.x + leftmost.w/2 - player.w/2;
-    player.y = leftmost.y - player.h - 8;
+    // Respawn directly above the first (leftmost) platform
+    const first = platforms[0];
+    player.x = first.x + first.w/2 - player.w/2;
+    player.y = first.y - player.h - 8;
   player.vx = 0;
   player.vy = 0;
     player.onGround = false;
