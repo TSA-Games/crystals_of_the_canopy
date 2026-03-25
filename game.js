@@ -313,10 +313,23 @@
   }
 
   function _resetPlayer() {
-    player.x = 40;
-    player.y = 200;
-    player.vx = 0;
-    player.vy = 0;
+    // Find the nearest platform horizontally to the last x position (or start if new)
+    let spawnX = player.x || 40;
+    let nearest = platforms[0];
+    let minDist = Math.abs((platforms[0].x + platforms[0].w/2) - spawnX);
+    for (const p of platforms) {
+      let px = p.x + p.w/2;
+      let dist = Math.abs(px - spawnX);
+      if (dist < minDist) {
+        minDist = dist;
+        nearest = p;
+      }
+    }
+    // Place player above the center of the nearest platform
+    player.x = nearest.x + nearest.w/2 - player.w/2;
+    player.y = nearest.y - player.h - 8;
+  player.vx = 0;
+  player.vy = 0;
     player.onGround = false;
     player.coyoteCounter = 0;
     player.jumpBufferCounter = 0;
