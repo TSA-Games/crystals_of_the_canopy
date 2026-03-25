@@ -35,7 +35,7 @@
   // Load forest background image
   // Load new PNG background image
   const forestBg = new Image();
-  forestBg.src = 'images/Untitled design.png';
+  forestBg.src = 'images/forest background.png';
 
   let width = 800;
   let height = 600;
