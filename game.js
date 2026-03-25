@@ -109,6 +109,7 @@
   let gameWon = false;
   let currentLevel = 1;
   let levelScore = 0;
+  let lives = 5;
 
   // Level 6 timer
   let level6Timer = 15;
@@ -322,32 +323,32 @@
     player.speedBoostTimer = 0;
     player.magnetActive = false;
     player.magnetTimer = 0;
-  // Reset coins/crystals for current level
-  for (const coin of coins) coin.collected = false;
-  for (const crystal of crystals) crystal.collected = false;
-  for (const magnet of magnets) magnet.collected = false;
-  coinsCollected = 0;
-  totalCoins = coins.length;
-  // Reset points earned in this level
-  score -= levelScore;
-  levelScore = 0;
-      if (currentLevel === 6) {
-        // Respawn crystals for Level 6
-        crystals.length = 0;
-        for (let i = 0; i < platforms.length; i++) {
-          const p = platforms[i];
-          const crystalOffset = (i % 2 === 0) ? -40 : 40;
-          const crystalX = Math.max(20, Math.min(width - 20, p.x + crystalOffset));
-          crystals.push({
-            x: crystalX,
-            y: p.y - 40,
-            r: 8,
-            hue: (180 + i * 15) % 360,
-            collected: false
-          });
-        }
-        level6Timer = LEVEL6_TIME_LIMIT;
+    // Reset coins/crystals for current level
+    for (const coin of coins) coin.collected = false;
+    for (const crystal of crystals) crystal.collected = false;
+    for (const magnet of magnets) magnet.collected = false;
+    coinsCollected = 0;
+    totalCoins = coins.length;
+    // Reset points earned in this level
+    score -= levelScore;
+    levelScore = 0;
+    if (currentLevel === 6) {
+      // Respawn crystals for Level 6
+      crystals.length = 0;
+      for (let i = 0; i < platforms.length; i++) {
+        const p = platforms[i];
+        const crystalOffset = (i % 2 === 0) ? -40 : 40;
+        const crystalX = Math.max(20, Math.min(width - 20, p.x + crystalOffset));
+        crystals.push({
+          x: crystalX,
+          y: p.y - 40,
+          r: 8,
+          hue: (180 + i * 15) % 360,
+          collected: false
+        });
       }
+      level6Timer = LEVEL6_TIME_LIMIT;
+    }
   }
 
   // Initialize once, then hook resize
@@ -568,7 +569,16 @@
     }
 
     if (player.y > height + 100) {
-      _resetPlayer();
+      lives--;
+      if (lives > 0) {
+        _resetPlayer();
+      } else {
+        // Out of lives: reset to level 1 and restore lives
+        currentLevel = 1;
+        lives = 5;
+        _initGame();
+        _resetPlayer();
+      }
       return;
     }
     // Level 6 timer logic
@@ -756,15 +766,16 @@
     drawPlayer(ctx, player);
 
     // Draw HUD on scaled canvas
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-    ctx.fillRect(0, 0, 350, 110);
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+  ctx.fillRect(0, 0, 350, 130);
 
-    ctx.fillStyle = '#fff';
-    ctx.font = `bold 16px Arial`;
-    ctx.textBaseline = 'top';
-    ctx.fillText(`Level: ${currentLevel}`, 16, 12);
-    ctx.fillText(`Score: ${score}`, 16, 32);
-    ctx.fillText(`Coins: ${coinsCollected}/${totalCoins}`, 16, 52);
+  ctx.fillStyle = '#fff';
+  ctx.font = `bold 16px Arial`;
+  ctx.textBaseline = 'top';
+  ctx.fillText(`Level: ${currentLevel}`, 16, 12);
+  ctx.fillText(`Score: ${score}`, 16, 32);
+  ctx.fillText(`Coins: ${coinsCollected}/${totalCoins}`, 16, 52);
+  ctx.fillText(`Lives: ${lives}`, 16, 72);
     // Level 6 timer progress bar (center top, red)
     if (currentLevel === 6 && !gameWon) {
       let timerBarW = 220, timerBarH = 18;
