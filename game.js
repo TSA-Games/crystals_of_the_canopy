@@ -422,8 +422,8 @@
         if (playerOnMovingPlatform.moving === 'x') {
           player.x = playerOnMovingPlatform.x + playerOffsetOnPlatformX;
         } else if (playerOnMovingPlatform.moving === 'y') {
-          // For vertical platforms, keep player at the same Y offset from the platform top
-          player.y = playerOnMovingPlatform.y + playerOffsetOnPlatformY;
+          // For vertical platforms, keep the player exactly on top of the platform
+          player.y = playerOnMovingPlatform.y - player.h;
           player.x = playerOnMovingPlatform.x + playerOffsetOnPlatformX;
         }
       }
@@ -668,7 +668,8 @@
       if (currentLevel === 7 && (platform.moving === 'x' || platform.moving === 'y')) {
         playerOnMovingPlatform = platform;
         playerOffsetOnPlatformX = player.x - platform.x;
-        playerOffsetOnPlatformY = player.y - platform.y + platform.h; // Offset to keep player above platform
+        // For vertical movement, store the offset so player stays at the same relative position
+        playerOffsetOnPlatformY = platform.h; // Keep player on top of platform
       } else {
         playerOnMovingPlatform = null;
       }
