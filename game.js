@@ -120,6 +120,10 @@
   let flashTransitionTimer = 0;
   let flashTransitionNextLevel = null;
 
+  // Track the moving platform the player is standing on (Level 7)
+  let playerOnMovingPlatform = null;
+  let playerOffsetOnPlatform = 0; // Track horizontal/vertical offset on platform
+
   // Swoosh sound effect
   const wooshSound = new Audio('sounds/swoosh.mp3');
   wooshSound.volume = 0.7;
@@ -411,6 +415,15 @@
           p.y = p.baseY + Math.sin(performance.now() / 1000 * p.speed) * p.range;
         }
       }
+      
+      // Move player with the platform they're standing on
+      if (playerOnMovingPlatform && player.onGround) {
+        if (playerOnMovingPlatform.moving === 'x') {
+          player.x = playerOnMovingPlatform.x + playerOffsetOnPlatform;
+        } else if (playerOnMovingPlatform.moving === 'y') {
+          player.y = playerOnMovingPlatform.y + playerOffsetOnPlatform;
+        }
+      }
     }
     
     const moveLeft = keys['ArrowLeft'] || keys['a'];
@@ -459,6 +472,7 @@
     player.x = Math.max(0, Math.min(width - player.w, player.x));
 
     player.onGround = false;
+    playerOnMovingPlatform = null; // Clear platform tracking when leaving ground
     for (const platform of platforms) {
       _checkPlatformCollision(platform, prevY);
     }
@@ -647,18 +661,12 @@
       player.vy = 0;
       player.onGround = true;
       
-      // If player lands on a moving platform in Level 7, move player with it
+      // If player lands on a moving platform in Level 7, track it
       if (currentLevel === 7 && (platform.moving === 'x' || platform.moving === 'y')) {
-        // Calculate platform velocity based on its movement
-        if (platform.moving === 'x' && platform.baseX !== undefined) {
-          const prevX = platform.baseX + Math.sin((performance.now() - 16) / 1000 * platform.speed) * platform.range;
-          const currX = platform.x;
-          player.x += (currX - prevX);
-        } else if (platform.moving === 'y' && platform.baseY !== undefined) {
-          const prevY = platform.baseY + Math.sin((performance.now() - 16) / 1000 * platform.speed) * platform.range;
-          const currY = platform.y;
-          player.y += (currY - prevY);
-        }
+        playerOnMovingPlatform = platform;
+        playerOffsetOnPlatform = player.x - platform.x;
+      } else {
+        playerOnMovingPlatform = null;
       }
       return;
     }
