@@ -711,13 +711,13 @@
     }
     for (const p of platforms) {
       if (currentLevel !== 5 || blinkOn) {
-        ctx.fillStyle = '#8b7355';
-        ctx.fillRect(p.x - p.w / 2, p.y, p.w, p.h);
-        ctx.fillStyle = '#654321';
-        ctx.fillRect(p.x - p.w / 2, p.y + p.h, p.w, 2);
-        ctx.strokeStyle = '#a0826d';
-        ctx.lineWidth = 1;
-        ctx.strokeRect(p.x - p.w / 2, p.y, p.w, p.h);
+  ctx.fillStyle = '#ff2222'; // bright red
+  ctx.fillRect(p.x - p.w / 2, p.y, p.w, p.h);
+  ctx.fillStyle = '#ff5555'; // lighter red for bottom edge
+  ctx.fillRect(p.x - p.w / 2, p.y + p.h, p.w, 2);
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(p.x - p.w / 2, p.y, p.w, p.h);
       }
     }
     // Draw magnets as U-shaped
