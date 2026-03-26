@@ -776,7 +776,30 @@
   ctx.fillText(`Level: ${currentLevel}`, 16, 12);
   ctx.fillText(`Score: ${score}`, 16, 32);
   ctx.fillText(`Coins: ${coinsCollected}/${totalCoins}`, 16, 52);
-  ctx.fillText(`Lives: ${lives}`, 16, 72);
+
+    // Draw lives as hearts at the top right
+    const heartCount = 5;
+    const heartSize = 22;
+    const heartPad = 8;
+    const startX = width - (heartSize + heartPad) * heartCount - 16 + heartPad;
+    const y = 18;
+    for (let i = 0; i < heartCount; i++) {
+      const x = startX + i * (heartSize + heartPad);
+      ctx.save();
+      ctx.beginPath();
+      // Draw a heart shape
+      ctx.moveTo(x + heartSize/2, y + heartSize*0.72);
+      ctx.bezierCurveTo(x + heartSize*1.1, y + heartSize*0.15, x + heartSize*0.8, y - heartSize*0.25, x + heartSize/2, y + heartSize*0.18);
+      ctx.bezierCurveTo(x + heartSize*0.2, y - heartSize*0.25, x - heartSize*0.1, y + heartSize*0.15, x + heartSize/2, y + heartSize*0.72);
+      ctx.closePath();
+      ctx.fillStyle = i < lives ? '#ff2d55' : '#bbb';
+      ctx.globalAlpha = i < lives ? 1 : 0.3;
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+      ctx.restore();
+    }
     // Level 6 timer progress bar (center top, red)
     if (currentLevel === 6 && !gameWon) {
       let timerBarW = 220, timerBarH = 18;
