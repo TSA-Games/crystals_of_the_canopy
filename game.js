@@ -122,7 +122,8 @@
 
   // Track the moving platform the player is standing on (Level 7)
   let playerOnMovingPlatform = null;
-  let playerOffsetOnPlatform = 0; // Track horizontal/vertical offset on platform
+  let playerOffsetOnPlatformX = 0; // Horizontal offset from platform center
+  let playerOffsetOnPlatformY = 0; // Vertical offset from platform top
 
   // Swoosh sound effect
   const wooshSound = new Audio('sounds/swoosh.mp3');
@@ -419,9 +420,11 @@
       // Move player with the platform they're standing on
       if (playerOnMovingPlatform && player.onGround) {
         if (playerOnMovingPlatform.moving === 'x') {
-          player.x = playerOnMovingPlatform.x + playerOffsetOnPlatform;
+          player.x = playerOnMovingPlatform.x + playerOffsetOnPlatformX;
         } else if (playerOnMovingPlatform.moving === 'y') {
-          player.y = playerOnMovingPlatform.y + playerOffsetOnPlatform;
+          // For vertical platforms, keep player at the same Y offset from the platform top
+          player.y = playerOnMovingPlatform.y + playerOffsetOnPlatformY;
+          player.x = playerOnMovingPlatform.x + playerOffsetOnPlatformX;
         }
       }
     }
@@ -664,7 +667,8 @@
       // If player lands on a moving platform in Level 7, track it
       if (currentLevel === 7 && (platform.moving === 'x' || platform.moving === 'y')) {
         playerOnMovingPlatform = platform;
-        playerOffsetOnPlatform = player.x - platform.x;
+        playerOffsetOnPlatformX = player.x - platform.x;
+        playerOffsetOnPlatformY = player.y - platform.y + platform.h; // Offset to keep player above platform
       } else {
         playerOnMovingPlatform = null;
       }
