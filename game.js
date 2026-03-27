@@ -1,3 +1,18 @@
+  // Background music
+  const backgroundMusic = new Audio('sounds/backgground.mp3');
+  backgroundMusic.loop = true;
+  backgroundMusic.volume = 0.5;
+  // Start music on first user interaction (for browser autoplay policy)
+  let musicStarted = false;
+  function startMusic() {
+    if (!musicStarted) {
+      backgroundMusic.play();
+      musicStarted = true;
+    }
+  }
+  window.addEventListener('keydown', startMusic);
+  window.addEventListener('mousedown', startMusic);
+  window.addEventListener('touchstart', startMusic);
 // Crystals of the Canopy - Professional Platformer Game (patched)
 // Corrected: removed background image, fixed brace, added Level 3
 
