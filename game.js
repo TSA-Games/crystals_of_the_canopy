@@ -674,17 +674,33 @@
 
     if (plRight <= pLeft || plLeft >= pRight) return;
 
-    if (prevY + player.h <= pTop && plBottom >= pTop && player.vy >= 0) {
+    // Enhanced landing logic for moving platforms (especially vertical)
+    let platformVy = 0;
+    if (currentLevel === 7 && platform.moving === 'y' && platform.baseY !== undefined) {
+      // Approximate platform vertical velocity
+      const t = performance.now() / 1000;
+      const prevYPlat = platform.baseY + Math.sin((t - 0.016) * platform.speed) * platform.range;
+      platformVy = (platform.y - prevYPlat) / 0.016;
+    }
+    let landing = false;
+    if (
+      prevY + player.h <= pTop && plBottom >= pTop &&
+      (
+        player.vy >= 0 ||
+        (currentLevel === 7 && platform.moving === 'y' && platformVy > 0 && player.vy > platformVy - 2)
+      )
+    ) {
+      landing = true;
+    }
+    if (landing) {
       player.y = pTop - player.h;
       player.vy = 0;
       player.onGround = true;
-      
       // If player lands on a moving platform in Level 7, track it
       if (currentLevel === 7 && (platform.moving === 'x' || platform.moving === 'y')) {
         playerOnMovingPlatform = platform;
         playerOffsetOnPlatformX = player.x - platform.x;
-        // For vertical movement, store the offset so player stays at the same relative position
-        playerOffsetOnPlatformY = platform.h; // Keep player on top of platform
+        playerOffsetOnPlatformY = platform.h;
       } else {
         playerOnMovingPlatform = null;
       }
