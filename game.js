@@ -9,14 +9,27 @@
   let startScreenSelection = 0; // 0: Play, 1: How to Play, 2: Credits
 
   // Background music
-  const backgroundMusic = new Audio('sounds/background.mp3');
+  const backgroundMusic = new Audio('sounds/backgground.mp3');
   backgroundMusic.loop = true;
   backgroundMusic.volume = 0.5;
+  backgroundMusic.addEventListener('error', () => {
+    console.warn('Background music failed to load. Check if sounds/backgground.mp3 exists.');
+  });
+  
   // Start music on first user interaction (for browser autoplay policy)
   let musicStarted = false;
   function startMusic() {
+    if (!musicStarted && backgroundMusic.readyState !== 4) {
+      // Audio not ready, try to load it
+      backgroundMusic.load();
+    }
     if (!musicStarted) {
-      backgroundMusic.play();
+      const playPromise = backgroundMusic.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((error) => {
+          console.warn('Audio playback failed:', error);
+        });
+      }
       musicStarted = true;
     }
   }
@@ -388,9 +401,12 @@
     if (!showStartScreen) return;
     if (e.key === 'ArrowUp' || e.key === 'w') {
       startScreenSelection = (startScreenSelection + 2) % 3;
+      startMusic(); // Try to start music on any interaction
     } else if (e.key === 'ArrowDown' || e.key === 's') {
       startScreenSelection = (startScreenSelection + 1) % 3;
+      startMusic(); // Try to start music on any interaction
     } else if (e.key === 'Enter' || e.key === ' ') {
+      startMusic(); // Ensure music starts when Play is selected
       if (startScreenSelection === 0) {
         showStartScreen = false;
       }
@@ -409,7 +425,10 @@
       const bx = width/2 - btnW/2, by = btnY0 + i*btnYStep - btnH/2;
       if (mx >= bx && mx <= bx + btnW && my >= by && my <= by + btnH) {
         startScreenSelection = i;
-        if (i === 0) showStartScreen = false;
+        if (i === 0) {
+          startMusic(); // Ensure music starts when Play button is clicked
+          showStartScreen = false;
+        }
         // else: How to Play and Credits do nothing for now
         break;
       }
