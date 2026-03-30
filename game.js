@@ -1,4 +1,6 @@
-  // Mouse click support for start screen
+// ...existing code...
+
+  // Mouse click support for start screen (must be inside IIFE)
   canvas.addEventListener('mousedown', function(e) {
     if (!showStartScreen) return;
     const rect = canvas.getBoundingClientRect();
