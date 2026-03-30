@@ -1284,14 +1284,6 @@
       }
     }
 
-    // Speed boost glow
-    if (pl.speedBoostActive) {
-      ctx.strokeStyle = 'rgba(255, 100, 100, 0.6)';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.arc(w / 2, h / 2, Math.max(w, h) / 1.5, 0, Math.PI * 2);
-      ctx.stroke();
-    }
 
     ctx.restore();
   }
