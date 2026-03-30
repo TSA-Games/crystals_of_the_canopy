@@ -30,6 +30,7 @@
   let musicTimeout = null;
   let currentMusic = 1;
 
+
   function playBackgroundMusic1() {
     clearTimeout(musicTimeout);
     backgroundMusic2.pause();
@@ -37,8 +38,19 @@
     backgroundMusic1.currentTime = 0;
     backgroundMusic1.play();
     currentMusic = 1;
-    // Play for 35 seconds, then switch
+    // Remove any previous listener
+    backgroundMusic1.ontimeupdate = null;
+    backgroundMusic1.ontimeupdate = function() {
+      if (backgroundMusic1.duration && backgroundMusic1.currentTime >= backgroundMusic1.duration - 2) {
+        backgroundMusic1.ontimeupdate = null;
+        backgroundMusic1.pause();
+        playBackgroundMusic2();
+      }
+    };
+    // Also switch after 35 seconds if that's sooner
     musicTimeout = setTimeout(() => {
+      backgroundMusic1.ontimeupdate = null;
+      backgroundMusic1.pause();
       playBackgroundMusic2();
     }, 35000);
   }
