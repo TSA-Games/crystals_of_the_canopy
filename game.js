@@ -1264,14 +1264,23 @@
     ctx.ellipse(w / 2, h + 2, w * 0.6, h * 0.12, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // Draw animation frame centered on the character position
+    // Draw animation frame much smaller and adjust anchor point
     if (animationFrames && animationFrames.length > 0) {
       const frame = animationFrames[pl.animationFrame % animationFrames.length];
       if (frame.complete && frame.naturalWidth > 0 && frame.naturalHeight > 0) {
-        // Center the image: the center of the PNG is at (w/2, h/2)
-        const offsetX = (w / 2) - (frame.naturalWidth / 2);
-        const offsetY = (h / 2) - (frame.naturalHeight / 2);
-        ctx.drawImage(frame, offsetX, offsetY);
+        // Scale factor for even smaller character
+        const scale = 0.22; // 22% of original size (smaller)
+        const drawW = frame.naturalWidth * scale;
+        const drawH = frame.naturalHeight * scale;
+        // Keep the bridge point at the same relative position (0.62)
+        const offsetX = (w / 2) - (drawW / 2);
+        const offsetY = h - (drawH * 0.62);
+        // Apply stronger brightness filter
+        ctx.save();
+        ctx.filter = 'brightness(1.55)'; // Increase brightness by 55%
+        ctx.drawImage(frame, offsetX, offsetY, drawW, drawH);
+        ctx.filter = 'none';
+        ctx.restore();
       }
     }
 
