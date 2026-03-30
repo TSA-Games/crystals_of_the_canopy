@@ -741,8 +741,8 @@
     player.isMoving = Math.abs(player.vx) > 5;
     if (player.isMoving) {
       player.animationTimer += dt;
-      // Change frame every ~0.08 seconds (total animation duration ~1.36s for 17 frames)
-      if (player.animationTimer >= 0.08) {
+      // Change frame every ~0.045 seconds (total animation duration ~0.77s for 17 frames)
+      if (player.animationTimer >= 0.045) {
         player.animationTimer = 0;
         player.animationFrame = (player.animationFrame + 1) % animationFrames.length;
       }
