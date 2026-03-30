@@ -78,7 +78,7 @@
 
   // Load credits background image
   const creditsBg = new Image();
-  creditsBg.src = 'images/credits.png';
+  creditsBg.src = 'images/Credits.png';
 
   // Load player animation frames from images/animation2 (new character)
   const animationFrames = [];
