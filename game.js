@@ -481,14 +481,14 @@
     ctx.font = 'bold 28px Arial';
     const options = ['Play', 'How to Play', 'Credits'];
     for (let i = 0; i < options.length; i++) {
-      // Draw button background for mouse hitbox
+      // Draw button background for mouse hitbox (no highlight)
       const btnW = 320, btnH = 40;
       const bx = width/2 - btnW/2, by = 220 + i*60 - btnH/2;
-      ctx.fillStyle = (i === startScreenSelection) ? '#ff2d55' : '#444';
-      ctx.globalAlpha = (i === startScreenSelection) ? 0.18 : 0.10;
+      ctx.fillStyle = '#444';
+      ctx.globalAlpha = 0.10;
       ctx.fillRect(bx, by, btnW, btnH);
       ctx.globalAlpha = 1;
-      ctx.fillStyle = (i === startScreenSelection) ? '#ff2d55' : '#fff';
+      ctx.fillStyle = '#fff';
       ctx.fillText(options[i], width/2, 220 + i*60);
     }
   // (Removed instruction text at bottom)
