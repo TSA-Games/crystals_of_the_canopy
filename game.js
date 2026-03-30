@@ -6,6 +6,8 @@
 
   // Game state for start screen
   let showStartScreen = true;
+  let showHowToPlay = false;
+  let showCredits = false;
   let startScreenSelection = 0; // 0: Play, 1: How to Play, 2: Credits
 
   // Background music
@@ -69,6 +71,14 @@
   // Load start screen background image
   const startScreenBg = new Image();
   startScreenBg.src = 'images/start page.png';
+
+  // Load how to play background image
+  const howToPlayBg = new Image();
+  howToPlayBg.src = 'images/How To Play.png';
+
+  // Load credits background image
+  const creditsBg = new Image();
+  creditsBg.src = 'images/credits.png';
 
   let width = 800;
   let height = 600;
@@ -412,6 +422,10 @@
       startMusic(); // Ensure music starts when Play is selected
       if (startScreenSelection === 0) {
         showStartScreen = false;
+      } else if (startScreenSelection === 1) {
+        showHowToPlay = true;
+      } else if (startScreenSelection === 2) {
+        showCredits = true;
       }
     }
   });
@@ -431,8 +445,11 @@
         if (i === 0) {
           startMusic(); // Ensure music starts when Play button is clicked
           showStartScreen = false;
+        } else if (i === 1) {
+          showHowToPlay = true;
+        } else if (i === 2) {
+          showCredits = true;
         }
-        // else: How to Play and Credits do nothing for now
         break;
       }
     }
@@ -478,6 +495,88 @@
     ctx.restore();
   }
 
+  // How to Play screen rendering function
+  function _renderHowToPlay() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
+    ctx.scale(PIXEL_RATIO, PIXEL_RATIO);
+    // Draw how to play background image if loaded, else fallback
+    if (howToPlayBg.complete && howToPlayBg.naturalWidth > 0) {
+      ctx.drawImage(howToPlayBg, 0, 0, width, height);
+    } else {
+      ctx.fillStyle = '#222';
+      ctx.fillRect(0, 0, width, height);
+    }
+    // Draw back button at top-left
+    const backBtnW = 120, backBtnH = 40;
+    const backBtnX = 20, backBtnY = 20;
+    ctx.fillStyle = '#ff2d55';
+    ctx.globalAlpha = 0.15;
+    ctx.fillRect(backBtnX, backBtnY, backBtnW, backBtnH);
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 20px Arial';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('← BACK', backBtnX + 10, backBtnY + backBtnH / 2);
+    ctx.restore();
+  }
+
+  // Credits screen rendering function
+  function _renderCredits() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
+    ctx.scale(PIXEL_RATIO, PIXEL_RATIO);
+    // Draw credits background image if loaded, else fallback
+    if (creditsBg.complete && creditsBg.naturalWidth > 0) {
+      ctx.drawImage(creditsBg, 0, 0, width, height);
+    } else {
+      ctx.fillStyle = '#222';
+      ctx.fillRect(0, 0, width, height);
+    }
+    // Draw back button at top-left
+    const backBtnW = 120, backBtnH = 40;
+    const backBtnX = 20, backBtnY = 20;
+    ctx.fillStyle = '#ff2d55';
+    ctx.globalAlpha = 0.15;
+    ctx.fillRect(backBtnX, backBtnY, backBtnW, backBtnH);
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 20px Arial';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('← BACK', backBtnX + 10, backBtnY + backBtnH / 2);
+    ctx.restore();
+  }
+
+  // Handle back button clicks for How to Play and Credits
+  canvas.addEventListener('mousedown', function(e) {
+    if (!showHowToPlay && !showCredits) return;
+    const rect = canvas.getBoundingClientRect();
+    const mx = (e.clientX - rect.left) / (rect.right - rect.left) * width;
+    const my = (e.clientY - rect.top) / (rect.bottom - rect.top) * height;
+    // Back button hitbox
+    const backBtnW = 120, backBtnH = 40;
+    const backBtnX = 20, backBtnY = 20;
+    if (mx >= backBtnX && mx <= backBtnX + backBtnW && my >= backBtnY && my <= backBtnY + backBtnH) {
+      showHowToPlay = false;
+      showCredits = false;
+      showStartScreen = true;
+      startScreenSelection = 0;
+    }
+  });
+
+  // Handle back button presses for How to Play and Credits
+  window.addEventListener('keydown', function(e) {
+    if (!showHowToPlay && !showCredits) return;
+    if (e.key === 'Escape' || e.key === 'Backspace') {
+      showHowToPlay = false;
+      showCredits = false;
+      showStartScreen = true;
+      startScreenSelection = 0;
+    }
+  });
+
   // ============================================================================
   // GAME LOOP
   // ============================================================================
@@ -488,6 +587,16 @@
     lastTime = now;
     if (showStartScreen) {
       _renderStartScreen();
+      requestAnimationFrame(gameLoop);
+      return;
+    }
+    if (showHowToPlay) {
+      _renderHowToPlay();
+      requestAnimationFrame(gameLoop);
+      return;
+    }
+    if (showCredits) {
+      _renderCredits();
       requestAnimationFrame(gameLoop);
       return;
     }
