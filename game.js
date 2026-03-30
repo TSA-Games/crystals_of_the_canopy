@@ -441,14 +441,16 @@
     for (let i = 0; i < 3; i++) {
       const bx = width/2 - btnW/2, by = btnY0 + i*btnYStep - btnH/2;
       if (mx >= bx && mx <= bx + btnW && my >= by && my <= by + btnH) {
-        startScreenSelection = i;
+        // Immediately navigate when clicked
         if (i === 0) {
           startMusic(); // Ensure music starts when Play button is clicked
           showStartScreen = false;
         } else if (i === 1) {
           showHowToPlay = true;
+          showStartScreen = false;
         } else if (i === 2) {
           showCredits = true;
+          showStartScreen = false;
         }
         break;
       }
