@@ -1,9 +1,15 @@
+// Crystals of the Canopy - Professional Platformer Game (patched)
+// Corrected: removed background image, fixed brace, added Level 3
+
+(function () {
+  'use strict';
+
   // Game state for start screen
   let showStartScreen = true;
   let startScreenSelection = 0; // 0: Play, 1: How to Play, 2: Credits
 
   // Background music
-  const backgroundMusic = new Audio('sounds/backgground.mp3');
+  const backgroundMusic = new Audio('sounds/background.mp3');
   backgroundMusic.loop = true;
   backgroundMusic.volume = 0.5;
   // Start music on first user interaction (for browser autoplay policy)
@@ -14,14 +20,6 @@
       musicStarted = true;
     }
   }
-  window.addEventListener('keydown', startMusic);
-  window.addEventListener('mousedown', startMusic);
-  window.addEventListener('touchstart', startMusic);
-// Crystals of the Canopy - Professional Platformer Game (patched)
-// Corrected: removed background image, fixed brace, added Level 3
-
-(function () {
-  'use strict';
 
   // ============================================================================
   // CONFIGURATION CONSTANTS
@@ -87,11 +85,14 @@
   window.addEventListener('keydown', (e) => {
     keys[e.key] = true;
     if (e.code) keys[e.code] = true;
+    startMusic(); // Start music on any key press
   });
   window.addEventListener('keyup', (e) => {
     keys[e.key] = false;
     if (e.code) keys[e.code] = false;
   });
+  window.addEventListener('mousedown', startMusic);
+  window.addEventListener('touchstart', startMusic);
 
   // ============================================================================
   // PLAYER OBJECT
@@ -382,21 +383,7 @@
   _resetPlayer();
   window.addEventListener('resize', () => resizeCanvas(true));
 
-  // ============================================================================
-  // GAME LOOP
-  // ============================================================================
-  let lastTime = performance.now();
-  function gameLoop(now) {
-    const rawDt = (now - lastTime) / 1000;
-    const dt = Math.min(0.05, rawDt);
-    lastTime = now;
-    if (showStartScreen) {
-      _renderStartScreen();
-      requestAnimationFrame(gameLoop);
-      return;
-    }
-    if (flashTransitionActive) {
-  // Handle start screen input
+  // Start screen input handler
   window.addEventListener('keydown', function(e) {
     if (!showStartScreen) return;
     if (e.key === 'ArrowUp' || e.key === 'w') {
@@ -407,10 +394,10 @@
       if (startScreenSelection === 0) {
         showStartScreen = false;
       }
-      // else: How to Play and Credits do nothing for now
     }
   });
 
+  // Start screen rendering function
   function _renderStartScreen() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.save();
@@ -435,6 +422,21 @@
     ctx.fillText('Use ↑/↓ or W/S to select, Enter/Space to confirm', width/2, height - 60);
     ctx.restore();
   }
+
+  // ============================================================================
+  // GAME LOOP
+  // ============================================================================
+  let lastTime = performance.now();
+  function gameLoop(now) {
+    const rawDt = (now - lastTime) / 1000;
+    const dt = Math.min(0.05, rawDt);
+    lastTime = now;
+    if (showStartScreen) {
+      _renderStartScreen();
+      requestAnimationFrame(gameLoop);
+      return;
+    }
+    if (flashTransitionActive) {
       flashTransitionTimer += dt;
       if (flashTransitionTimer >= 0.7) {
         // End flash, start next level
