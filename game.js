@@ -834,7 +834,8 @@
         }
         const dx = crystal.x - (player.x + player.w / 2);
         const dy = crystal.y - (player.y + player.h / 2);
-        if (Math.hypot(dx, dy) < crystal.r + 14) {
+        // Make collection easier by increasing the touch radius
+        if (Math.hypot(dx, dy) < crystal.r + 20) {
           crystal.collected = true;
           player.speedBoostActive = true;
           player.speedBoostTimer = SPEED_BOOST_DURATION;
