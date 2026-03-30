@@ -10,28 +10,55 @@
   let showCredits = false;
   let startScreenSelection = 0; // 0: Play, 1: How to Play, 2: Credits
 
-  // Background music
-  const backgroundMusic = new Audio('sounds/backgground.mp3');
-  backgroundMusic.loop = true;
-  backgroundMusic.volume = 0.5;
-  backgroundMusic.addEventListener('error', () => {
+
+  // Alternating background music logic
+  const backgroundMusic1 = new Audio('sounds/backgground.mp3');
+  backgroundMusic1.loop = false;
+  backgroundMusic1.volume = 0.5;
+  backgroundMusic1.addEventListener('error', () => {
     console.warn('Background music failed to load. Check if sounds/backgground.mp3 exists.');
   });
-  
-  // Start music on first user interaction (for browser autoplay policy)
+
+  const backgroundMusic2 = new Audio('sounds/vlog-beat-background-349853.mp3');
+  backgroundMusic2.loop = false;
+  backgroundMusic2.volume = 0.5;
+  backgroundMusic2.addEventListener('error', () => {
+    console.warn('Background music failed to load. Check if sounds/vlog-beat-background-349853.mp3 exists.');
+  });
+
   let musicStarted = false;
+  let musicTimeout = null;
+  let currentMusic = 1;
+
+  function playBackgroundMusic1() {
+    clearTimeout(musicTimeout);
+    backgroundMusic2.pause();
+    backgroundMusic2.currentTime = 0;
+    backgroundMusic1.currentTime = 0;
+    backgroundMusic1.play();
+    currentMusic = 1;
+    // Play for 35 seconds, then switch
+    musicTimeout = setTimeout(() => {
+      playBackgroundMusic2();
+    }, 35000);
+  }
+
+  function playBackgroundMusic2() {
+    clearTimeout(musicTimeout);
+    backgroundMusic1.pause();
+    backgroundMusic1.currentTime = 0;
+    backgroundMusic2.currentTime = 0;
+    backgroundMusic2.play();
+    currentMusic = 2;
+    // Play for 35 seconds, then switch
+    musicTimeout = setTimeout(() => {
+      playBackgroundMusic1();
+    }, 35000);
+  }
+
   function startMusic() {
-    if (!musicStarted && backgroundMusic.readyState !== 4) {
-      // Audio not ready, try to load it
-      backgroundMusic.load();
-    }
     if (!musicStarted) {
-      const playPromise = backgroundMusic.play();
-      if (playPromise !== undefined) {
-        playPromise.catch((error) => {
-          console.warn('Audio playback failed:', error);
-        });
-      }
+      playBackgroundMusic1();
       musicStarted = true;
     }
   }
