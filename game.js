@@ -1,3 +1,21 @@
+  // Mouse click support for start screen
+  canvas.addEventListener('mousedown', function(e) {
+    if (!showStartScreen) return;
+    const rect = canvas.getBoundingClientRect();
+    const mx = (e.clientX - rect.left) / (rect.right - rect.left) * width;
+    const my = (e.clientY - rect.top) / (rect.bottom - rect.top) * height;
+    // Button hitboxes (centered)
+    const btnY0 = 220, btnYStep = 60, btnH = 40, btnW = 320;
+    for (let i = 0; i < 3; i++) {
+      const bx = width/2 - btnW/2, by = btnY0 + i*btnYStep - btnH/2;
+      if (mx >= bx && mx <= bx + btnW && my >= by && my <= by + btnH) {
+        startScreenSelection = i;
+        if (i === 0) showStartScreen = false;
+        // else: How to Play and Credits do nothing for now
+        break;
+      }
+    }
+  });
 // Crystals of the Canopy - Professional Platformer Game (patched)
 // Corrected: removed background image, fixed brace, added Level 3
 
@@ -414,6 +432,13 @@
     ctx.font = 'bold 28px Arial';
     const options = ['Play', 'How to Play', 'Credits'];
     for (let i = 0; i < options.length; i++) {
+      // Draw button background for mouse hitbox
+      const btnW = 320, btnH = 40;
+      const bx = width/2 - btnW/2, by = 220 + i*60 - btnH/2;
+      ctx.fillStyle = (i === startScreenSelection) ? '#ff2d55' : '#444';
+      ctx.globalAlpha = (i === startScreenSelection) ? 0.18 : 0.10;
+      ctx.fillRect(bx, by, btnW, btnH);
+      ctx.globalAlpha = 1;
       ctx.fillStyle = (i === startScreenSelection) ? '#ff2d55' : '#fff';
       ctx.fillText(options[i], width/2, 220 + i*60);
     }
