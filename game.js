@@ -491,9 +491,7 @@
       ctx.fillStyle = (i === startScreenSelection) ? '#ff2d55' : '#fff';
       ctx.fillText(options[i], width/2, 220 + i*60);
     }
-    ctx.font = '16px Arial';
-    ctx.fillStyle = '#aaa';
-    ctx.fillText('Use ↑/↓ or W/S to select, Enter/Space to confirm', width/2, height - 60);
+  // (Removed instruction text at bottom)
     ctx.restore();
   }
 
