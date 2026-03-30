@@ -1,3 +1,7 @@
+  // Game state for start screen
+  let showStartScreen = true;
+  let startScreenSelection = 0; // 0: Play, 1: How to Play, 2: Credits
+
   // Background music
   const backgroundMusic = new Audio('sounds/backgground.mp3');
   backgroundMusic.loop = true;
@@ -386,7 +390,51 @@
     const rawDt = (now - lastTime) / 1000;
     const dt = Math.min(0.05, rawDt);
     lastTime = now;
+    if (showStartScreen) {
+      _renderStartScreen();
+      requestAnimationFrame(gameLoop);
+      return;
+    }
     if (flashTransitionActive) {
+  // Handle start screen input
+  window.addEventListener('keydown', function(e) {
+    if (!showStartScreen) return;
+    if (e.key === 'ArrowUp' || e.key === 'w') {
+      startScreenSelection = (startScreenSelection + 2) % 3;
+    } else if (e.key === 'ArrowDown' || e.key === 's') {
+      startScreenSelection = (startScreenSelection + 1) % 3;
+    } else if (e.key === 'Enter' || e.key === ' ') {
+      if (startScreenSelection === 0) {
+        showStartScreen = false;
+      }
+      // else: How to Play and Credits do nothing for now
+    }
+  });
+
+  function _renderStartScreen() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
+    ctx.scale(PIXEL_RATIO, PIXEL_RATIO);
+    ctx.fillStyle = '#222';
+    ctx.globalAlpha = 0.85;
+    ctx.fillRect(0, 0, width, height);
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 48px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillText('Crystals of the Canopy', width/2, 80);
+    ctx.font = 'bold 28px Arial';
+    const options = ['Play', 'How to Play', 'Credits'];
+    for (let i = 0; i < options.length; i++) {
+      ctx.fillStyle = (i === startScreenSelection) ? '#ff2d55' : '#fff';
+      ctx.fillText(options[i], width/2, 220 + i*60);
+    }
+    ctx.font = '16px Arial';
+    ctx.fillStyle = '#aaa';
+    ctx.fillText('Use ↑/↓ or W/S to select, Enter/Space to confirm', width/2, height - 60);
+    ctx.restore();
+  }
       flashTransitionTimer += dt;
       if (flashTransitionTimer >= 0.7) {
         // End flash, start next level
