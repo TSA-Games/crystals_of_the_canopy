@@ -80,14 +80,6 @@
   const creditsBg = new Image();
   creditsBg.src = 'images/credits.png';
 
-  // Load player animation frames
-  const animationFrames = [];
-  for (let i = 1; i <= 17; i++) {
-    const img = new Image();
-    img.src = `images/ANIMATION/${String(i).padStart(4, '0')}.png`;
-    animationFrames.push(img);
-  }
-
   let width = 800;
   let height = 600;
   const PIXEL_RATIO = Math.max(1, window.devicePixelRatio || 1);
@@ -146,10 +138,7 @@
     speedBoostActive: false,
     speedBoostTimer: 0,
     magnetActive: false,
-    magnetTimer: 0,
-    animationFrame: 0,
-    animationTimer: 0,
-    isMoving: false
+    magnetTimer: 0
   };
 
   // ============================================================================
@@ -386,9 +375,6 @@
     player.speedBoostTimer = 0;
     player.magnetActive = false;
     player.magnetTimer = 0;
-    player.animationFrame = 0;
-    player.animationTimer = 0;
-    player.isMoving = false;
     // Reset coins/crystals for current level
     for (const coin of coins) coin.collected = false;
     for (const crystal of crystals) crystal.collected = false;
@@ -735,21 +721,6 @@
       player.walkTimer += dt * 8;
     } else {
       player.walkTimer += dt * 2;
-    }
-
-    // Update animation
-    player.isMoving = Math.abs(player.vx) > 5;
-    if (player.isMoving) {
-      player.animationTimer += dt;
-      // Change frame every ~0.08 seconds (total animation duration ~1.36s for 17 frames)
-      if (player.animationTimer >= 0.08) {
-        player.animationTimer = 0;
-        player.animationFrame = (player.animationFrame + 1) % animationFrames.length;
-      }
-    } else {
-      // Reset animation when stopped
-      player.animationFrame = 0;
-      player.animationTimer = 0;
     }
 
     // Level 6 timer logic
@@ -1254,141 +1225,133 @@
     ctx.save();
     ctx.translate(pl.x, pl.y);
 
-    // Try to draw the animation frame
-    if (animationFrames.length > 0 && animationFrames[pl.animationFrame].complete && animationFrames[pl.animationFrame].naturalWidth > 0) {
-      // Draw the animation frame
-      const frame = animationFrames[pl.animationFrame];
-      ctx.drawImage(frame, 0, 0, pl.w, pl.h);
-    } else {
-      // Fallback to original drawn player if animation frame not loaded
-      const w = pl.w;
-      const h = pl.h;
+    const w = pl.w;
+    const h = pl.h;
 
-      // Shadow
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
-      ctx.beginPath();
-      ctx.ellipse(w / 2, h + 2, w * 0.6, h * 0.12, 0, 0, Math.PI * 2);
-      ctx.fill();
+    // Shadow
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+    ctx.beginPath();
+    ctx.ellipse(w / 2, h + 2, w * 0.6, h * 0.12, 0, 0, Math.PI * 2);
+    ctx.fill();
 
-      // Head
-      const headR = w * 0.6;
-      ctx.fillStyle = '#ffcc99';
-      ctx.beginPath();
-      ctx.arc(w / 2, h * 0.08, headR, 0, Math.PI * 2);
-      ctx.fill();
+    // Head
+    const headR = w * 0.6;
+    ctx.fillStyle = '#ffcc99';
+    ctx.beginPath();
+    ctx.arc(w / 2, h * 0.08, headR, 0, Math.PI * 2);
+    ctx.fill();
 
-      // Hair
-      ctx.fillStyle = '#8b6f47';
-      ctx.beginPath();
-      ctx.arc(w / 2, h * 0.08, headR, 0, Math.PI);
-      ctx.fill();
+    // Hair
+    ctx.fillStyle = '#8b6f47';
+    ctx.beginPath();
+    ctx.arc(w / 2, h * 0.08, headR, 0, Math.PI);
+    ctx.fill();
 
-      // Hair spikes
-      ctx.fillStyle = '#8b6f47';
-      ctx.beginPath();
-      ctx.moveTo(w / 2 - headR * 0.4, h * -0.05);
-      ctx.lineTo(w / 2 - headR * 0.3, h * -0.15);
-      ctx.lineTo(w / 2 - headR * 0.1, h * -0.05);
-      ctx.closePath();
-      ctx.fill();
+    // Hair spikes
+    ctx.fillStyle = '#8b6f47';
+    ctx.beginPath();
+    ctx.moveTo(w / 2 - headR * 0.4, h * -0.05);
+    ctx.lineTo(w / 2 - headR * 0.3, h * -0.15);
+    ctx.lineTo(w / 2 - headR * 0.1, h * -0.05);
+    ctx.closePath();
+    ctx.fill();
 
-      ctx.beginPath();
-      ctx.moveTo(w / 2, h * -0.08);
-      ctx.lineTo(w / 2 + headR * 0.05, h * -0.18);
-      ctx.lineTo(w / 2 + headR * 0.2, h * -0.08);
-      ctx.closePath();
-      ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(w / 2, h * -0.08);
+    ctx.lineTo(w / 2 + headR * 0.05, h * -0.18);
+    ctx.lineTo(w / 2 + headR * 0.2, h * -0.08);
+    ctx.closePath();
+    ctx.fill();
 
-      ctx.beginPath();
-      ctx.moveTo(w / 2 + headR * 0.4, h * -0.05);
-      ctx.lineTo(w / 2 + headR * 0.3, h * -0.15);
-      ctx.lineTo(w / 2 + headR * 0.1, h * -0.05);
-      ctx.closePath();
-      ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(w / 2 + headR * 0.4, h * -0.05);
+    ctx.lineTo(w / 2 + headR * 0.3, h * -0.15);
+    ctx.lineTo(w / 2 + headR * 0.1, h * -0.05);
+    ctx.closePath();
+    ctx.fill();
 
-      // Eyes
-      ctx.fillStyle = '#fff';
-      ctx.beginPath();
-      ctx.arc(w / 2 - headR * 0.3, h * 0.05, headR * 0.2, 0, Math.PI * 2);
-      ctx.arc(w / 2 + headR * 0.3, h * 0.05, headR * 0.2, 0, Math.PI * 2);
-      ctx.fill();
+    // Eyes
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(w / 2 - headR * 0.3, h * 0.05, headR * 0.2, 0, Math.PI * 2);
+    ctx.arc(w / 2 + headR * 0.3, h * 0.05, headR * 0.2, 0, Math.PI * 2);
+    ctx.fill();
 
-      ctx.fillStyle = '#0055aa';
-      ctx.beginPath();
-      ctx.arc(w / 2 - headR * 0.3, h * 0.05, headR * 0.12, 0, Math.PI * 2);
-      ctx.arc(w / 2 + headR * 0.3, h * 0.05, headR * 0.12, 0, Math.PI * 2);
-      ctx.fill();
+    ctx.fillStyle = '#0055aa';
+    ctx.beginPath();
+    ctx.arc(w / 2 - headR * 0.3, h * 0.05, headR * 0.12, 0, Math.PI * 2);
+    ctx.arc(w / 2 + headR * 0.3, h * 0.05, headR * 0.12, 0, Math.PI * 2);
+    ctx.fill();
 
-      ctx.fillStyle = '#000';
-      ctx.beginPath();
-      ctx.arc(w / 2 - headR * 0.3, h * 0.05, headR * 0.08, 0, Math.PI * 2);
-      ctx.arc(w / 2 + headR * 0.3, h * 0.05, headR * 0.08, 0, Math.PI * 2);
-      ctx.fill();
+    ctx.fillStyle = '#000';
+    ctx.beginPath();
+    ctx.arc(w / 2 - headR * 0.3, h * 0.05, headR * 0.08, 0, Math.PI * 2);
+    ctx.arc(w / 2 + headR * 0.3, h * 0.05, headR * 0.08, 0, Math.PI * 2);
+    ctx.fill();
 
-      // Smile
-      ctx.strokeStyle = '#666';
-      ctx.lineWidth = 1;
+    // Smile
+    ctx.strokeStyle = '#666';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(w / 2, h * 0.22, headR * 0.1, 0, Math.PI);
+    ctx.stroke();
+
+    // Shirt
+    ctx.fillStyle = '#2563eb';
+    ctx.fillRect(w * 0.08, h * 0.45, w * 0.84, h * 0.48);
+
+    // Collar
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.moveTo(w * 0.25, h * 0.45);
+    ctx.lineTo(w / 2, h * 0.35);
+    ctx.lineTo(w * 0.75, h * 0.45);
+    ctx.closePath();
+    ctx.fill();
+
+    // Arms
+    ctx.strokeStyle = '#ffcc99';
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = 'round';
+
+    const armSwing = Math.sin(pl.walkTimer) * 6 * (Math.abs(pl.vx) / pl.maxSpeed);
+    ctx.beginPath();
+    ctx.moveTo(w * 0.1, h * 0.55);
+    ctx.lineTo(w * 0.02 + armSwing, h * 0.65);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(w * 0.9, h * 0.55);
+    ctx.lineTo(w * 0.98 - armSwing, h * 0.65);
+    ctx.stroke();
+
+    // Legs
+    const legSwing = Math.sin(pl.walkTimer) * 4 * (Math.abs(pl.vx) / pl.maxSpeed);
+    ctx.strokeStyle = '#ffcc99';
+    ctx.beginPath();
+    ctx.moveTo(w * 0.3, h * 0.92);
+    ctx.lineTo(w * 0.3 + legSwing, h * 1.08);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(w * 0.7, h * 0.92);
+    ctx.lineTo(w * 0.7 - legSwing, h * 1.08);
+    ctx.stroke();
+
+    // Shoes
+    ctx.fillStyle = '#333';
+    ctx.beginPath();
+    ctx.ellipse(w * 0.3, h * 1.08, 2.5, 1.5, 0, 0, Math.PI * 2);
+    ctx.ellipse(w * 0.7, h * 1.08, 2.5, 1.5, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Speed boost glow
+    if (pl.speedBoostActive) {
+      ctx.strokeStyle = 'rgba(255, 100, 100, 0.6)';
+      ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.arc(w / 2, h * 0.22, headR * 0.1, 0, Math.PI);
+      ctx.arc(w / 2, h / 2, Math.max(w, h) / 1.5, 0, Math.PI * 2);
       ctx.stroke();
-
-      // Shirt
-      ctx.fillStyle = '#2563eb';
-      ctx.fillRect(w * 0.08, h * 0.45, w * 0.84, h * 0.48);
-
-      // Collar
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath();
-      ctx.moveTo(w * 0.25, h * 0.45);
-      ctx.lineTo(w / 2, h * 0.35);
-      ctx.lineTo(w * 0.75, h * 0.45);
-      ctx.closePath();
-      ctx.fill();
-
-      // Arms
-      ctx.strokeStyle = '#ffcc99';
-      ctx.lineWidth = 2.5;
-      ctx.lineCap = 'round';
-
-      const armSwing = Math.sin(pl.walkTimer) * 6 * (Math.abs(pl.vx) / pl.maxSpeed);
-      ctx.beginPath();
-      ctx.moveTo(w * 0.1, h * 0.55);
-      ctx.lineTo(w * 0.02 + armSwing, h * 0.65);
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.moveTo(w * 0.9, h * 0.55);
-      ctx.lineTo(w * 0.98 - armSwing, h * 0.65);
-      ctx.stroke();
-
-      // Legs
-      const legSwing = Math.sin(pl.walkTimer) * 4 * (Math.abs(pl.vx) / pl.maxSpeed);
-      ctx.strokeStyle = '#ffcc99';
-      ctx.beginPath();
-      ctx.moveTo(w * 0.3, h * 0.92);
-      ctx.lineTo(w * 0.3 + legSwing, h * 1.08);
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.moveTo(w * 0.7, h * 0.92);
-      ctx.lineTo(w * 0.7 - legSwing, h * 1.08);
-      ctx.stroke();
-
-      // Shoes
-      ctx.fillStyle = '#333';
-      ctx.beginPath();
-      ctx.ellipse(w * 0.3, h * 1.08, 2.5, 1.5, 0, 0, Math.PI * 2);
-      ctx.ellipse(w * 0.7, h * 1.08, 2.5, 1.5, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Speed boost glow
-      if (pl.speedBoostActive) {
-        ctx.strokeStyle = 'rgba(255, 100, 100, 0.6)';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(w / 2, h / 2, Math.max(w, h) / 1.5, 0, Math.PI * 2);
-        ctx.stroke();
-      }
     }
 
     ctx.restore();
