@@ -1269,7 +1269,7 @@
       const frame = animationFrames[pl.animationFrame % animationFrames.length];
       if (frame.complete && frame.naturalWidth > 0 && frame.naturalHeight > 0) {
         // Scale factor for even smaller character
-        const scale = 0.22; // 22% of original size (smaller)
+        const scale = 0.18; // 18% of original size (smaller)
         const drawW = frame.naturalWidth * scale;
         const drawH = frame.naturalHeight * scale;
         // Keep the bridge point at the same relative position (0.62)
