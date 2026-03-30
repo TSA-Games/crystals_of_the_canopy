@@ -1,23 +1,3 @@
-// ...existing code...
-
-  // Mouse click support for start screen (must be inside IIFE)
-  canvas.addEventListener('mousedown', function(e) {
-    if (!showStartScreen) return;
-    const rect = canvas.getBoundingClientRect();
-    const mx = (e.clientX - rect.left) / (rect.right - rect.left) * width;
-    const my = (e.clientY - rect.top) / (rect.bottom - rect.top) * height;
-    // Button hitboxes (centered)
-    const btnY0 = 220, btnYStep = 60, btnH = 40, btnW = 320;
-    for (let i = 0; i < 3; i++) {
-      const bx = width/2 - btnW/2, by = btnY0 + i*btnYStep - btnH/2;
-      if (mx >= bx && mx <= bx + btnW && my >= by && my <= by + btnH) {
-        startScreenSelection = i;
-        if (i === 0) showStartScreen = false;
-        // else: How to Play and Credits do nothing for now
-        break;
-      }
-    }
-  });
 // Crystals of the Canopy - Professional Platformer Game (patched)
 // Corrected: removed background image, fixed brace, added Level 3
 
@@ -403,7 +383,7 @@
   _resetPlayer();
   window.addEventListener('resize', () => resizeCanvas(true));
 
-  // Start screen input handler
+  // Start screen input handler (keyboard)
   window.addEventListener('keydown', function(e) {
     if (!showStartScreen) return;
     if (e.key === 'ArrowUp' || e.key === 'w') {
@@ -413,6 +393,25 @@
     } else if (e.key === 'Enter' || e.key === ' ') {
       if (startScreenSelection === 0) {
         showStartScreen = false;
+      }
+    }
+  });
+
+  // Start screen input handler (mouse)
+  canvas.addEventListener('mousedown', function(e) {
+    if (!showStartScreen) return;
+    const rect = canvas.getBoundingClientRect();
+    const mx = (e.clientX - rect.left) / (rect.right - rect.left) * width;
+    const my = (e.clientY - rect.top) / (rect.bottom - rect.top) * height;
+    // Button hitboxes (centered)
+    const btnY0 = 220, btnYStep = 60, btnH = 40, btnW = 320;
+    for (let i = 0; i < 3; i++) {
+      const bx = width/2 - btnW/2, by = btnY0 + i*btnYStep - btnH/2;
+      if (mx >= bx && mx <= bx + btnW && my >= by && my <= by + btnH) {
+        startScreenSelection = i;
+        if (i === 0) showStartScreen = false;
+        // else: How to Play and Credits do nothing for now
+        break;
       }
     }
   });
