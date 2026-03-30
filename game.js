@@ -62,10 +62,13 @@
   }
   const ctx = canvas.getContext('2d');
 
-  // Load forest background image
-  // Load new PNG background image
+  // Load forest background image for game
   const forestBg = new Image();
   forestBg.src = 'images/forest background.png';
+
+  // Load start screen background image
+  const startScreenBg = new Image();
+  startScreenBg.src = 'images/start page.png';
 
   let width = 800;
   let height = 600;
@@ -440,8 +443,15 @@
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.save();
     ctx.scale(PIXEL_RATIO, PIXEL_RATIO);
-    ctx.fillStyle = '#222';
+    // Draw start screen background image if loaded, else fallback
+    if (startScreenBg.complete && startScreenBg.naturalWidth > 0) {
+      ctx.drawImage(startScreenBg, 0, 0, width, height);
+    } else {
+      ctx.fillStyle = '#222';
+      ctx.fillRect(0, 0, width, height);
+    }
     ctx.globalAlpha = 0.85;
+    ctx.fillStyle = '#222';
     ctx.fillRect(0, 0, width, height);
     ctx.globalAlpha = 1;
     ctx.fillStyle = '#fff';
