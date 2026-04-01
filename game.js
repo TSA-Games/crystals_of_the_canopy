@@ -892,6 +892,8 @@
         // Out of lives: reset to level 1 and restore lives
         currentLevel = 1;
         lives = 5;
+        score = 0;
+        levelScore = 0;
         _initGame();
         _resetPlayer();
       }
