@@ -119,11 +119,11 @@
   const creditsBg = new Image();
   creditsBg.src = 'images/Credits.png';
 
-  // Load player animation frames from images/animation2 (new character)
+  // Load player animation frames from images/ANIMATION (new character)
   const animationFrames = [];
   for (let i = 1; i <= 17; i++) {
     const img = new Image();
-    img.src = `images/animation2/${String(i).padStart(4, '0')}.png`;
+    img.src = `images/ANIMATION/${String(100 + i).padStart(4, '0')}.png`;
     animationFrames.push(img);
   }
 
