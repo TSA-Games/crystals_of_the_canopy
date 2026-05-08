@@ -127,6 +127,40 @@
     animationFrames.push(img);
   }
 
+  // Load jump animation frames (used when player is in the air)
+  const jumpFrames = [];
+  // Jump frames: files named 0101.png..0115.png in this project
+  for (let i = 1; i <= 15; i++) {
+    const img = new Image();
+    img.src = `images/animation jump/${String(100 + i).padStart(4, '0')}.png`;
+    jumpFrames.push(img);
+  }
+
+  // Load backwards (walking-left) frames
+  const backwardsFrames = [];
+  for (let i = 0; i <= 40; i++) {
+    const idx = String(i).padStart(4, '0');
+    const img = new Image();
+    img.src = `images/animation backwards/${idx}.png`;
+    backwardsFrames.push(img);
+  }
+
+  // Load mascott animation (played on YOU WIN screen)
+  const mascottFrames = [];
+  for (let i = 1; i <= 39; i++) {
+    const img = new Image();
+    img.src = `images/animation mascott/${String(i).padStart(4, '0')}.png`;
+    mascottFrames.push(img);
+  }
+
+  // Load per-level backgrounds from images/vg/level N.png
+  const vgBackgrounds = {};
+  for (let i = 1; i <= 7; i++) {
+    const img = new Image();
+    img.src = `images/vg/level ${i}.png`;
+    vgBackgrounds[i] = img;
+  }
+
   let width = 800;
   let height = 600;
   const PIXEL_RATIO = Math.max(1, window.devicePixelRatio || 1);
@@ -220,6 +254,10 @@
   let playerOnMovingPlatform = null;
   let playerOffsetOnPlatformX = 0; // Horizontal offset from platform center
   let playerOffsetOnPlatformY = 0; // Vertical offset from platform top
+
+  // Mascott animation timer for the win screen
+  let mascottTimer = 0;
+  let mascottFrame = 0;
 
   // Swoosh sound effect
   const wooshSound = new Audio('sounds/swoosh.mp3');
@@ -676,9 +714,8 @@
       _update(dt);
     }
     _render();
-    if (!gameWon) {
-      requestAnimationFrame(gameLoop);
-    }
+    // Keep the loop running so animations (like mascott on win) continue
+    requestAnimationFrame(gameLoop);
   }
   requestAnimationFrame(gameLoop);
 
@@ -776,19 +813,41 @@
       player.walkTimer += dt * 2;
     }
 
-    // Update animation
-    player.isMoving = Math.abs(player.vx) > 5;
-    if (player.isMoving) {
-      player.animationTimer += dt;
-      // Change frame every ~0.045 seconds (total animation duration ~0.77s for 17 frames)
-      if (player.animationTimer >= 0.045) {
+    // Update animation: choose frame set based on state
+    const inAir = !player.onGround;
+    const movingLeft = player.vx < -5 && player.onGround;
+    const movingRight = player.vx > 5 && player.onGround;
+
+    player.animationTimer += dt;
+    // Frame change interval (fast enough)
+    const frameInterval = 0.045;
+
+    if (inAir && jumpFrames.length > 0) {
+      // Use jump frames (loop)
+      if (player.animationTimer >= frameInterval) {
+        player.animationTimer = 0;
+        player.animationFrame = (player.animationFrame + 1) % jumpFrames.length;
+      }
+      player._currentFrameSet = 'jump';
+    } else if (movingLeft && backwardsFrames.length > 0) {
+      // Use backwards frames (loop) - they are provided in forward order; play them as-is to look backwards
+      if (player.animationTimer >= frameInterval) {
+        player.animationTimer = 0;
+        player.animationFrame = (player.animationFrame + 1) % backwardsFrames.length;
+      }
+      player._currentFrameSet = 'backwards';
+    } else if ((movingRight || player.isMoving) && animationFrames.length > 0) {
+      // Default forward walking animation
+      if (player.animationTimer >= frameInterval) {
         player.animationTimer = 0;
         player.animationFrame = (player.animationFrame + 1) % animationFrames.length;
       }
+      player._currentFrameSet = 'forward';
     } else {
-      // Reset animation when stopped
+      // Idle frame
       player.animationFrame = 0;
       player.animationTimer = 0;
+      player._currentFrameSet = 'forward';
     }
 
     // Level 6 timer logic
@@ -944,6 +1003,14 @@
         }
       }
     }
+    // Advance mascott animation when game is won
+    if (gameWon) {
+      mascottTimer += dt;
+      if (mascottTimer >= 0.06) {
+        mascottTimer = 0;
+        mascottFrame = (mascottFrame + 1) % (mascottFrames.length || 1);
+      }
+    }
   } // end of _update
 
   function _checkPlatformCollision(platform, prevY) {
@@ -1019,8 +1086,11 @@
     // Clear full canvas (pixel ratio aware)
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw forest background image if loaded, otherwise fallback to blue
-    if (forestBg.complete && forestBg.naturalWidth > 0) {
+    // Draw per-level background if available, otherwise forest fallback
+    const bgImg = vgBackgrounds[currentLevel] || forestBg;
+    if (bgImg && bgImg.complete && bgImg.naturalWidth > 0) {
+      ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
+    } else if (forestBg.complete && forestBg.naturalWidth > 0) {
       ctx.drawImage(forestBg, 0, 0, canvas.width, canvas.height);
     } else {
       ctx.fillStyle = '#4da6ff';
@@ -1093,7 +1163,7 @@
       if (!crystal.collected) drawCrystal(ctx, crystal.x, crystal.y, crystal.r, crystal.hue);
     }
 
-    drawPlayer(ctx, player);
+  drawPlayer(ctx, player);
 
     // Draw HUD on scaled canvas
   ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
@@ -1207,6 +1277,19 @@
       ctx.textBaseline = 'middle';
       ctx.fillText('YOU WIN!!', width / 2, height / 2 - 50);
 
+      // Draw mascott animation to the right of the YOU WIN text
+      if (mascottFrames && mascottFrames.length > 0) {
+        const mf = mascottFrames[mascottFrame % mascottFrames.length];
+        if (mf.complete && mf.naturalWidth > 0 && mf.naturalHeight > 0) {
+          const scale = 0.35; // medium size
+          const drawW = mf.naturalWidth * scale;
+          const drawH = mf.naturalHeight * scale;
+          const x = width / 2 + 220; // place to the right of text
+          const y = height / 2 - drawH / 2 - 20;
+          ctx.drawImage(mf, x - drawW/2, y, drawW, drawH);
+        }
+      }
+
       ctx.fillStyle = '#ffff00';
       ctx.font = `28px Arial`;
       ctx.fillText(`Final Score: ${score}`, width / 2, height / 2 + 30);
@@ -1306,24 +1389,32 @@
     ctx.ellipse(w / 2, h + 2, w * 0.6, h * 0.12, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // Draw animation frame much smaller and adjust anchor point
-    if (animationFrames && animationFrames.length > 0) {
-      const frame = animationFrames[pl.animationFrame % animationFrames.length];
-      if (frame.complete && frame.naturalWidth > 0 && frame.naturalHeight > 0) {
-        // Scale factor for even smaller character
-        const scale = 0.18; // 18% of original size (smaller)
-        const drawW = frame.naturalWidth * scale;
-        const drawH = frame.naturalHeight * scale;
-        // Keep the bridge point at the same relative position (0.62)
-        const offsetX = (w / 2) - (drawW / 2);
-        const offsetY = h - (drawH * 0.62);
-        // Apply stronger brightness filter
-        ctx.save();
-        ctx.filter = 'brightness(1.55)'; // Increase brightness by 55%
-        ctx.drawImage(frame, offsetX, offsetY, drawW, drawH);
-        ctx.filter = 'none';
-        ctx.restore();
-      }
+    // Determine which frame set to draw
+    let frame = null;
+    const set = pl._currentFrameSet || 'forward';
+    if (set === 'jump' && jumpFrames.length > 0) {
+      frame = jumpFrames[pl.animationFrame % jumpFrames.length];
+    } else if (set === 'backwards' && backwardsFrames.length > 0) {
+      // Play backwards frames in reverse order to appear walking backwards
+      const idx = pl.animationFrame % backwardsFrames.length;
+      const revIdx = (backwardsFrames.length - 1) - idx;
+      frame = backwardsFrames[revIdx];
+    } else if (animationFrames.length > 0) {
+      frame = animationFrames[pl.animationFrame % animationFrames.length];
+    }
+    if (frame && frame.complete && frame.naturalWidth > 0 && frame.naturalHeight > 0) {
+      // Use the same visual scale as other animations (match previous small scale)
+      const scale = 0.18;
+      const drawW = frame.naturalWidth * scale;
+      const drawH = frame.naturalHeight * scale;
+      // Keep the touch/bridge point at the same relative position as before (0.62)
+      const offsetX = (w / 2) - (drawW / 2);
+      const offsetY = h - (drawH * 0.62);
+      ctx.save();
+      ctx.filter = 'brightness(1.55)';
+      ctx.drawImage(frame, offsetX, offsetY, drawW, drawH);
+      ctx.filter = 'none';
+      ctx.restore();
     }
 
 
