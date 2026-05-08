@@ -136,14 +136,7 @@
     jumpFrames.push(img);
   }
 
-  // Load backwards (walking-left) frames
-  const backwardsFrames = [];
-  for (let i = 0; i <= 40; i++) {
-    const idx = String(i).padStart(4, '0');
-    const img = new Image();
-    img.src = `images/animation backwards/${idx}.png`;
-    backwardsFrames.push(img);
-  }
+  // Note: backwards animation uses the forward frames played in reverse
 
   // Load mascott animation (played on YOU WIN screen)
   const mascottFrames = [];
@@ -829,20 +822,13 @@
         player.animationFrame = (player.animationFrame + 1) % jumpFrames.length;
       }
       player._currentFrameSet = 'jump';
-    } else if (movingLeft && backwardsFrames.length > 0) {
-      // Use backwards frames (loop) - they are provided in forward order; play them as-is to look backwards
-      if (player.animationTimer >= frameInterval) {
-        player.animationTimer = 0;
-        player.animationFrame = (player.animationFrame + 1) % backwardsFrames.length;
-      }
-      player._currentFrameSet = 'backwards';
-    } else if ((movingRight || player.isMoving) && animationFrames.length > 0) {
-      // Default forward walking animation
+    } else if ((movingRight || movingLeft || player.isMoving) && animationFrames.length > 0) {
+      // Forward or backwards walking animation (uses forward frames reversed when moving left)
       if (player.animationTimer >= frameInterval) {
         player.animationTimer = 0;
         player.animationFrame = (player.animationFrame + 1) % animationFrames.length;
       }
-      player._currentFrameSet = 'forward';
+      player._currentFrameSet = movingLeft ? 'backwards' : 'forward';
     } else {
       // Idle frame
       player.animationFrame = 0;
@@ -1394,11 +1380,11 @@
     const set = pl._currentFrameSet || 'forward';
     if (set === 'jump' && jumpFrames.length > 0) {
       frame = jumpFrames[pl.animationFrame % jumpFrames.length];
-    } else if (set === 'backwards' && backwardsFrames.length > 0) {
-      // Play backwards frames in reverse order to appear walking backwards
-      const idx = pl.animationFrame % backwardsFrames.length;
-      const revIdx = (backwardsFrames.length - 1) - idx;
-      frame = backwardsFrames[revIdx];
+    } else if (set === 'backwards' && animationFrames.length > 0) {
+      // Play forward frames in reverse order for backwards animation
+      const idx = pl.animationFrame % animationFrames.length;
+      const revIdx = (animationFrames.length - 1) - idx;
+      frame = animationFrames[revIdx];
     } else if (animationFrames.length > 0) {
       frame = animationFrames[pl.animationFrame % animationFrames.length];
     }
