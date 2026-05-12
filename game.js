@@ -1006,10 +1006,20 @@
           wooshSound.play();
         }
       } else if (currentLevel === 7) {
-        // Start flash transition to YOU WIN
-        flashTransitionActive = true;
+        // Freeze gameplay immediately on win to prevent glitches
+        gameWon = true;
+        flashTransitionActive = false;
         flashTransitionTimer = 0;
-        flashTransitionNextLevel = 8;
+        flashTransitionNextLevel = null;
+        player.vx = 0;
+        player.vy = 0;
+        player.onGround = true;
+        player.jumpBufferCounter = 0;
+        player.coyoteCounter = 0;
+        player.speedBoostActive = false;
+        player.speedBoostTimer = 0;
+        player.magnetActive = false;
+        player.magnetTimer = 0;
         // Play woosh sound
         if (wooshSound) {
           wooshSound.currentTime = 0;
