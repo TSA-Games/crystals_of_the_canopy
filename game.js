@@ -1140,9 +1140,9 @@
         if (magnetFrames && magnetFrames.length > 0) {
           const frame = magnetFrames[magnet.animationFrame % magnetFrames.length];
           if (frame.complete && frame.naturalWidth > 0 && frame.naturalHeight > 0) {
-            // Scale magnet animation to match the size of the drawn magnet (r: 18)
+            // Scale magnet animation to be much smaller
             // The magnet animation frames should be scaled appropriately
-            const scale = 0.8; // Adjust this to match desired magnet size
+            const scale = 0.08; // 10 times smaller
             const drawW = frame.naturalWidth * scale;
             const drawH = frame.naturalHeight * scale;
             // Draw centered on magnet position
