@@ -212,7 +212,7 @@
     h: PLAYER_HEIGHT,
     vx: 0,
     vy: 0,
-    maxSpeed: 200,
+    maxSpeed: 240,
     onGround: false,
     walkTimer: 0,
     coyoteCounter: 0,
