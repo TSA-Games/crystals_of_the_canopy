@@ -774,8 +774,7 @@
                   Math.abs(player.vx + accel * dt) > Math.abs(targetVx) ? targetVx :
                   player.vx + accel * dt;
     } else {
-      player.vx *= FRICTION;
-      if (Math.abs(player.vx) < 2) player.vx = 0;
+      player.vx = 0;
     }
 
     if (!player.onGround) {
