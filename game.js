@@ -154,6 +154,14 @@
     vgBackgrounds[i] = img;
   }
 
+  // Load magnet animation frames
+  const magnetFrames = [];
+  for (let i = 1; i <= 50; i++) {
+    const img = new Image();
+    img.src = `images/magnet .pngs/${String(i).padStart(4, '0')}.png`;
+    magnetFrames.push(img);
+  }
+
   let width = 800;
   let height = 600;
   const PIXEL_RATIO = Math.max(1, window.devicePixelRatio || 1);
@@ -259,6 +267,17 @@
   // ============================================================================
   // GAME INITIALIZATION
   // ============================================================================
+  function _createMagnet(x, y) {
+    return {
+      x: x,
+      y: y,
+      r: 18,
+      collected: false,
+      animationFrame: 0,
+      animationTimer: 0
+    };
+  }
+
   function _initGame() {
   lives = 5; // Reset lives at the start of each level
     platforms.length = 0;
@@ -276,8 +295,8 @@
   platforms.push({ x: 560 * baseScale, y: 390, w: 140, h: PLATFORM_HEIGHT });
   platforms.push({ x: 680 * baseScale, y: 420, w: 140, h: PLATFORM_HEIGHT });
   // Magnets
-  magnets.push({ x: 160 * baseScale, y: 410, r: 18 });
-  magnets.push({ x: 600 * baseScale, y: 370, r: 18 });
+  magnets.push(_createMagnet(160 * baseScale, 410));
+  magnets.push(_createMagnet(600 * baseScale, 370));
 
   } else if (currentLevel === 2) {
       // Level 2: HARD - Smaller, tricky platforms with challenging gaps and heights
@@ -291,8 +310,8 @@
   platforms.push({ x: 700 * baseScale, y: 400, w: 110, h: PLATFORM_HEIGHT });
   platforms.push({ x: 770 * baseScale, y: 450, w: 115, h: PLATFORM_HEIGHT });
   // Magnets
-  magnets.push({ x: 120 * baseScale, y: 470, r: 18 });
-  magnets.push({ x: 680 * baseScale, y: 410, r: 18 });
+  magnets.push(_createMagnet(120 * baseScale, 470));
+  magnets.push(_createMagnet(680 * baseScale, 410));
 
   } else if (currentLevel === 3) {
       // Level 3: EXTREME - zig-zag, high jumps, varied widths
@@ -305,8 +324,8 @@
   platforms.push({ x: 720 * baseScale, y: 420, w: 80,  h: PLATFORM_HEIGHT });   // Drop down, a bit wider
   platforms.push({ x: 800 * baseScale, y: 350, w: 160, h: PLATFORM_HEIGHT });   // Final wide platform, a bit wider
   // Magnets
-  magnets.push({ x: 320 * baseScale, y: 480, r: 18 });
-  magnets.push({ x: 700 * baseScale, y: 340, r: 18 });
+  magnets.push(_createMagnet(320 * baseScale, 480));
+  magnets.push(_createMagnet(700 * baseScale, 340));
   } else if (currentLevel === 4) {
       // Level 4: IMPOSSIBLE - extreme gaps, heights, and narrow bridges
   platforms.push({ x: 50 * baseScale,  y: 540, w: 50,  h: PLATFORM_HEIGHT });   // Start, ultra-narrow
@@ -316,8 +335,8 @@
   platforms.push({ x: 650 * baseScale, y: 500, w: 50,  h: PLATFORM_HEIGHT });   // Drop down, narrow
   platforms.push({ x: 800 * baseScale, y: 250, w: 60,  h: PLATFORM_HEIGHT });   // Final, highest, narrow
   // Magnets
-  magnets.push({ x: 350 * baseScale, y: 500, r: 18 });
-  magnets.push({ x: 800 * baseScale, y: 230, r: 18 });
+  magnets.push(_createMagnet(350 * baseScale, 500));
+  magnets.push(_createMagnet(800 * baseScale, 230));
   } else if (currentLevel === 5) {
       // Level 5: BLINKING - identical to Level 3, but platforms blink
       platforms.push({ x: 60 * baseScale,  y: 520, w: 60,  h: PLATFORM_HEIGHT });
@@ -329,8 +348,8 @@
       platforms.push({ x: 720 * baseScale, y: 420, w: 60,  h: PLATFORM_HEIGHT });
       platforms.push({ x: 800 * baseScale, y: 350, w: 140, h: PLATFORM_HEIGHT });
       // Magnets
-      magnets.push({ x: 160 * baseScale, y: 340, r: 18 });
-      magnets.push({ x: 800 * baseScale, y: 330, r: 18 });
+      magnets.push(_createMagnet(160 * baseScale, 340));
+      magnets.push(_createMagnet(800 * baseScale, 330));
     } else if (currentLevel === 6) {
       // Level 6: Timed challenge - reach end in 15 seconds
       platforms.push({ x: 80 * baseScale, y: 500, w: 120, h: PLATFORM_HEIGHT });
@@ -340,7 +359,7 @@
       platforms.push({ x: 620 * baseScale, y: 470, w: 90, h: PLATFORM_HEIGHT });
       platforms.push({ x: 720 * baseScale, y: 350, w: 140, h: PLATFORM_HEIGHT });
       // Magnets
-      magnets.push({ x: 220 * baseScale, y: 410, r: 18 });
+      magnets.push(_createMagnet(220 * baseScale, 410));
       // Speed boost crystals
       crystals.length = 0;
       for (let i = 0; i < platforms.length; i++) {
@@ -376,8 +395,8 @@
         p.baseY = p.y;
       }
       // Magnets
-      magnets.push({ x: 320 * baseScale, y: 420, r: 18 });
-      magnets.push({ x: 800 * baseScale, y: 180, r: 18 });
+      magnets.push(_createMagnet(320 * baseScale, 420));
+      magnets.push(_createMagnet(800 * baseScale, 180));
       // Speed boost crystals
       crystals.length = 0;
       for (let i = 0; i < platforms.length; i++) {
@@ -888,6 +907,16 @@
         }
       }
     }
+    // Update magnet animations
+    for (const magnet of magnets) {
+      if (!magnet.collected && magnetFrames.length > 0) {
+        magnet.animationTimer += dt;
+        if (magnet.animationTimer >= 0.05) {
+          magnet.animationTimer = 0;
+          magnet.animationFrame = (magnet.animationFrame + 1) % magnetFrames.length;
+        }
+      }
+    }
     // Magnet collect logic
     for (const magnet of magnets) {
       if (!magnet.collected) {
@@ -1105,39 +1134,23 @@
   ctx.strokeRect(p.x - p.w / 2, p.y, p.w, p.h);
       }
     }
-    // Draw magnets as U-shaped
+    // Draw magnets as animated frames
     for (const magnet of magnets) {
       if (!magnet.collected) {
-        ctx.save();
-        // Outer arc (U body)
-        ctx.beginPath();
-        ctx.arc(magnet.x, magnet.y, magnet.r, Math.PI * 0.15, Math.PI * 1.85, false);
-        ctx.lineWidth = magnet.r * 0.5;
-        ctx.strokeStyle = '#ff3333';
-        ctx.shadowColor = '#fff';
-        ctx.shadowBlur = 2;
-        ctx.stroke();
-        ctx.shadowBlur = 0;
-        // Inner arc (U gap)
-        ctx.beginPath();
-        ctx.arc(magnet.x, magnet.y, magnet.r * 0.65, Math.PI * 0.15, Math.PI * 1.85, false);
-        ctx.lineWidth = magnet.r * 0.5 - 2;
-        ctx.strokeStyle = '#222';
-        ctx.stroke();
-        // Poles (rectangles at ends)
-        let poleW = magnet.r * 0.35;
-        let poleH = magnet.r * 0.32;
-        let angle1 = Math.PI * 0.15;
-        let angle2 = Math.PI * 1.85;
-        let x1 = magnet.x + Math.cos(angle1) * magnet.r * 0.98 - poleW / 2;
-        let y1 = magnet.y + Math.sin(angle1) * magnet.r * 0.98;
-        let x2 = magnet.x + Math.cos(angle2) * magnet.r * 0.98 - poleW / 2;
-        let y2 = magnet.y + Math.sin(angle2) * magnet.r * 0.98;
-        ctx.fillStyle = '#fff';
-        ctx.fillRect(x1, y1, poleW, poleH);
-        ctx.fillStyle = '#00bfff';
-        ctx.fillRect(x2, y2, poleW, poleH);
-        ctx.restore();
+        if (magnetFrames && magnetFrames.length > 0) {
+          const frame = magnetFrames[magnet.animationFrame % magnetFrames.length];
+          if (frame.complete && frame.naturalWidth > 0 && frame.naturalHeight > 0) {
+            // Scale magnet animation to match the size of the drawn magnet (r: 18)
+            // The magnet animation frames should be scaled appropriately
+            const scale = 0.8; // Adjust this to match desired magnet size
+            const drawW = frame.naturalWidth * scale;
+            const drawH = frame.naturalHeight * scale;
+            // Draw centered on magnet position
+            ctx.save();
+            ctx.drawImage(frame, magnet.x - drawW / 2, magnet.y - drawH / 2, drawW, drawH);
+            ctx.restore();
+          }
+        }
       }
     }
 
