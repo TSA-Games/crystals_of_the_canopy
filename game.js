@@ -735,7 +735,7 @@
   // UPDATE LOGIC
   // ============================================================================
   function _update(dt) {
-    if (flashTransitionActive) return; // Pause gameplay during flash
+    if (flashTransitionActive || gameWon) return; // Pause gameplay during flash or after win
     
     // Move platforms for Level 7 (each frame)
     if (currentLevel === 7) {
@@ -862,6 +862,8 @@
         return;
       }
     }
+    if (gameWon) return;
+
     // Magnet attraction for coins
     for (const coin of coins) {
       if (!coin.collected) {
