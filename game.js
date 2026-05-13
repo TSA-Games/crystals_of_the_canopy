@@ -206,20 +206,20 @@
 
   // On-screen touch controls for gameplay
   const touchButtons = {
-    up: { x: 0, y: 0, w: 40, h: 40, pressed: false },
-    left: { x: 0, y: 0, w: 40, h: 40, pressed: false },
-    right: { x: 0, y: 0, w: 40, h: 40, pressed: false }
+    up: { x: 0, y: 0, w: 80, h: 80, pressed: false },
+    left: { x: 0, y: 0, w: 80, h: 80, pressed: false },
+    right: { x: 0, y: 0, w: 80, h: 80, pressed: false }
   };
 
   function updateTouchButtonPositions() {
-    // Position buttons in bottom-right corner
+    // Position buttons: up on bottom-left, left and right on bottom-right
     const padding = 10;
-    touchButtons.right.x = width - 60 - padding;
-    touchButtons.right.y = height - 60 - padding;
-    touchButtons.left.x = width - 110 - padding;
-    touchButtons.left.y = height - 60 - padding;
-    touchButtons.up.x = width - 85 - padding;
-    touchButtons.up.y = height - 110 - padding;
+    touchButtons.up.x = padding;
+    touchButtons.up.y = height - 90 - padding;
+    touchButtons.left.x = width - 170 - padding;
+    touchButtons.left.y = height - 90 - padding;
+    touchButtons.right.x = width - 80 - padding;
+    touchButtons.right.y = height - 90 - padding;
   }
 
   canvas.addEventListener('touchstart', function(e) {
@@ -1427,44 +1427,44 @@
 
     // Draw on-screen touch buttons for mobile gameplay
     if (!gameWon) {
-      const btnSize = 40;
+      const btnSize = 80;
       const padding = 10;
       
-      // Draw left button
-      ctx.fillStyle = 'rgba(255, 100, 100, 0.6)';
-      ctx.fillRect(touchButtons.left.x, touchButtons.left.y, btnSize, btnSize);
-      ctx.strokeStyle = '#fff';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(touchButtons.left.x, touchButtons.left.y, btnSize, btnSize);
-      ctx.fillStyle = '#fff';
-      ctx.font = 'bold 24px Arial';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('←', touchButtons.left.x + btnSize/2, touchButtons.left.y + btnSize/2);
-      
-      // Draw right button
-      ctx.fillStyle = 'rgba(100, 150, 255, 0.6)';
-      ctx.fillRect(touchButtons.right.x, touchButtons.right.y, btnSize, btnSize);
-      ctx.strokeStyle = '#fff';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(touchButtons.right.x, touchButtons.right.y, btnSize, btnSize);
-      ctx.fillStyle = '#fff';
-      ctx.font = 'bold 24px Arial';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('→', touchButtons.right.x + btnSize/2, touchButtons.right.y + btnSize/2);
-      
-      // Draw up/jump button
+      // Draw up button (bottom-left)
       ctx.fillStyle = 'rgba(100, 255, 100, 0.6)';
       ctx.fillRect(touchButtons.up.x, touchButtons.up.y, btnSize, btnSize);
       ctx.strokeStyle = '#fff';
       ctx.lineWidth = 2;
       ctx.strokeRect(touchButtons.up.x, touchButtons.up.y, btnSize, btnSize);
       ctx.fillStyle = '#fff';
-      ctx.font = 'bold 24px Arial';
+      ctx.font = 'bold 48px Arial';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText('↑', touchButtons.up.x + btnSize/2, touchButtons.up.y + btnSize/2);
+      
+      // Draw left button (bottom-right area, left)
+      ctx.fillStyle = 'rgba(255, 100, 100, 0.6)';
+      ctx.fillRect(touchButtons.left.x, touchButtons.left.y, btnSize, btnSize);
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(touchButtons.left.x, touchButtons.left.y, btnSize, btnSize);
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 48px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('←', touchButtons.left.x + btnSize/2, touchButtons.left.y + btnSize/2);
+      
+      // Draw right button (bottom-right)
+      ctx.fillStyle = 'rgba(100, 150, 255, 0.6)';
+      ctx.fillRect(touchButtons.right.x, touchButtons.right.y, btnSize, btnSize);
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(touchButtons.right.x, touchButtons.right.y, btnSize, btnSize);
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 48px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('→', touchButtons.right.x + btnSize/2, touchButtons.right.y + btnSize/2);
     }
 
     if (gameWon) {
