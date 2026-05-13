@@ -180,6 +180,8 @@
     canvas.height = Math.floor(height * PIXEL_RATIO);
     ctx.imageSmoothingEnabled = false;
 
+    updateTouchButtonPositions(); // Recalculate button positions on resize
+
     if (shouldInit && sizeChanged) {
       _initGame();
       _resetPlayer();
@@ -201,6 +203,152 @@
   });
   window.addEventListener('mousedown', startMusic);
   window.addEventListener('touchstart', startMusic);
+
+  // On-screen touch controls for gameplay
+  const touchButtons = {
+    up: { x: 0, y: 0, w: 40, h: 40, pressed: false },
+    left: { x: 0, y: 0, w: 40, h: 40, pressed: false },
+    right: { x: 0, y: 0, w: 40, h: 40, pressed: false }
+  };
+
+  function updateTouchButtonPositions() {
+    // Position buttons in bottom-right corner
+    const padding = 10;
+    touchButtons.right.x = width - 60 - padding;
+    touchButtons.right.y = height - 60 - padding;
+    touchButtons.left.x = width - 110 - padding;
+    touchButtons.left.y = height - 60 - padding;
+    touchButtons.up.x = width - 85 - padding;
+    touchButtons.up.y = height - 110 - padding;
+  }
+
+  canvas.addEventListener('touchstart', function(e) {
+    const rect = canvas.getBoundingClientRect();
+    for (const touch of e.touches) {
+      const tx = (touch.clientX - rect.left) / (rect.right - rect.left) * width;
+      const ty = (touch.clientY - rect.top) / (rect.bottom - rect.top) * height;
+
+      // Check touch buttons during gameplay
+      if (!showStartScreen && !showHowToPlay && !showCredits) {
+        if (tx >= touchButtons.left.x && tx <= touchButtons.left.x + touchButtons.left.w &&
+            ty >= touchButtons.left.y && ty <= touchButtons.left.y + touchButtons.left.h) {
+          keys['ArrowLeft'] = true;
+          keys['a'] = true;
+        }
+        if (tx >= touchButtons.right.x && tx <= touchButtons.right.x + touchButtons.right.w &&
+            ty >= touchButtons.right.y && ty <= touchButtons.right.y + touchButtons.right.h) {
+          keys['ArrowRight'] = true;
+          keys['d'] = true;
+        }
+        if (tx >= touchButtons.up.x && tx <= touchButtons.up.x + touchButtons.up.w &&
+            ty >= touchButtons.up.y && ty <= touchButtons.up.y + touchButtons.up.h) {
+          keys['ArrowUp'] = true;
+          keys['w'] = true;
+          keys['Space'] = true;
+        }
+      }
+    }
+  });
+
+  canvas.addEventListener('touchend', function(e) {
+    // Release all touch buttons when touch ends
+    keys['ArrowLeft'] = false;
+    keys['a'] = false;
+    keys['ArrowRight'] = false;
+    keys['d'] = false;
+    keys['ArrowUp'] = false;
+    keys['w'] = false;
+    keys['Space'] = false;
+  });
+
+  canvas.addEventListener('touchmove', function(e) {
+    e.preventDefault(); // Prevent scrolling
+    const rect = canvas.getBoundingClientRect();
+    for (const touch of e.touches) {
+      const tx = (touch.clientX - rect.left) / (rect.right - rect.left) * width;
+      const ty = (touch.clientY - rect.top) / (rect.bottom - rect.top) * height;
+
+      // Update which buttons are pressed based on current touch position
+      if (!showStartScreen && !showHowToPlay && !showCredits) {
+        // Check left button
+        if (tx >= touchButtons.left.x && tx <= touchButtons.left.x + touchButtons.left.w &&
+            ty >= touchButtons.left.y && ty <= touchButtons.left.y + touchButtons.left.h) {
+          keys['ArrowLeft'] = true;
+          keys['a'] = true;
+        } else {
+          keys['ArrowLeft'] = false;
+          keys['a'] = false;
+        }
+        // Check right button
+        if (tx >= touchButtons.right.x && tx <= touchButtons.right.x + touchButtons.right.w &&
+            ty >= touchButtons.right.y && ty <= touchButtons.right.y + touchButtons.right.h) {
+          keys['ArrowRight'] = true;
+          keys['d'] = true;
+        } else {
+          keys['ArrowRight'] = false;
+          keys['d'] = false;
+        }
+        // Check up button
+        if (tx >= touchButtons.up.x && tx <= touchButtons.up.x + touchButtons.up.w &&
+            ty >= touchButtons.up.y && ty <= touchButtons.up.y + touchButtons.up.h) {
+          keys['ArrowUp'] = true;
+          keys['w'] = true;
+          keys['Space'] = true;
+        } else {
+          keys['ArrowUp'] = false;
+          keys['w'] = false;
+          keys['Space'] = false;
+        }
+      }
+    }
+  });
+
+  // Start screen touchscreen input
+  canvas.addEventListener('touchstart', function(e) {
+    if (!showStartScreen) return;
+    const rect = canvas.getBoundingClientRect();
+    for (const touch of e.touches) {
+      const tx = (touch.clientX - rect.left) / (rect.right - rect.left) * width;
+      const ty = (touch.clientY - rect.top) / (rect.bottom - rect.top) * height;
+      // Button hitboxes (centered)
+      const btnY0 = 220, btnYStep = 60, btnH = 40, btnW = 320;
+      for (let i = 0; i < 3; i++) {
+        const bx = width/2 - btnW/2, by = btnY0 + i*btnYStep - btnH/2;
+        if (tx >= bx && tx <= bx + btnW && ty >= by && ty <= by + btnH) {
+          if (i === 0) {
+            startMusic();
+            showStartScreen = false;
+          } else if (i === 1) {
+            showHowToPlay = true;
+            showStartScreen = false;
+          } else if (i === 2) {
+            showCredits = true;
+            showStartScreen = false;
+          }
+          break;
+        }
+      }
+    }
+  });
+
+  // Back button touchscreen input
+  canvas.addEventListener('touchstart', function(e) {
+    if (!showHowToPlay && !showCredits) return;
+    const rect = canvas.getBoundingClientRect();
+    for (const touch of e.touches) {
+      const tx = (touch.clientX - rect.left) / (rect.right - rect.left) * width;
+      const ty = (touch.clientY - rect.top) / (rect.bottom - rect.top) * height;
+      // Back button hitbox
+      const backBtnW = 120, backBtnH = 40;
+      const backBtnX = 20, backBtnY = 20;
+      if (tx >= backBtnX && tx <= backBtnX + backBtnW && ty >= backBtnY && ty <= backBtnY + backBtnH) {
+        showHowToPlay = false;
+        showCredits = false;
+        showStartScreen = true;
+        startScreenSelection = 0;
+      }
+    }
+  });
 
   // ============================================================================
   // PLAYER OBJECT
@@ -1276,6 +1424,48 @@
     ctx.fillStyle = '#aaa';
     ctx.font = `12px Arial`;
     ctx.fillText('ARROWS/WASD - Move | SPACE/W - Jump', 16, height - 24);
+
+    // Draw on-screen touch buttons for mobile gameplay
+    if (!gameWon) {
+      const btnSize = 40;
+      const padding = 10;
+      
+      // Draw left button
+      ctx.fillStyle = 'rgba(255, 100, 100, 0.6)';
+      ctx.fillRect(touchButtons.left.x, touchButtons.left.y, btnSize, btnSize);
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(touchButtons.left.x, touchButtons.left.y, btnSize, btnSize);
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 24px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('←', touchButtons.left.x + btnSize/2, touchButtons.left.y + btnSize/2);
+      
+      // Draw right button
+      ctx.fillStyle = 'rgba(100, 150, 255, 0.6)';
+      ctx.fillRect(touchButtons.right.x, touchButtons.right.y, btnSize, btnSize);
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(touchButtons.right.x, touchButtons.right.y, btnSize, btnSize);
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 24px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('→', touchButtons.right.x + btnSize/2, touchButtons.right.y + btnSize/2);
+      
+      // Draw up/jump button
+      ctx.fillStyle = 'rgba(100, 255, 100, 0.6)';
+      ctx.fillRect(touchButtons.up.x, touchButtons.up.y, btnSize, btnSize);
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(touchButtons.up.x, touchButtons.up.y, btnSize, btnSize);
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 24px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('↑', touchButtons.up.x + btnSize/2, touchButtons.up.y + btnSize/2);
+    }
 
     if (gameWon) {
       ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
