@@ -8,6 +8,7 @@
   let showStartScreen = true;
   let showHowToPlay = false;
   let showCredits = false;
+  let showHelp = false;
   let startScreenSelection = 0; // 0: Play, 1: How to Play, 2: Credits
 
 
@@ -118,6 +119,10 @@
   // Load credits background image
   const creditsBg = new Image();
   creditsBg.src = 'images/Credits.png';
+
+  // Load help screen background image
+  const helpBg = new Image();
+  helpBg.src = 'images/help.png';
 
   // Load player animation frames from images/ANIMATION (new character)
   const animationFrames = [];
@@ -318,6 +323,7 @@
           if (i === 0) {
             startMusic();
             showStartScreen = false;
+            showHelp = true;
           } else if (i === 1) {
             showHowToPlay = true;
             showStartScreen = false;
@@ -673,6 +679,7 @@
       startMusic(); // Ensure music starts when Play is selected
       if (startScreenSelection === 0) {
         showStartScreen = false;
+        showHelp = true;
       } else if (startScreenSelection === 1) {
         showHowToPlay = true;
       } else if (startScreenSelection === 2) {
@@ -696,6 +703,7 @@
         if (i === 0) {
           startMusic(); // Ensure music starts when Play button is clicked
           showStartScreen = false;
+          showHelp = true;
         } else if (i === 1) {
           showHowToPlay = true;
           showStartScreen = false;
@@ -800,6 +808,63 @@
     ctx.restore();
   }
 
+  // Help screen rendering function
+  function _renderHelp() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
+    ctx.scale(PIXEL_RATIO, PIXEL_RATIO);
+    // Draw help background image if loaded, else fallback
+    if (helpBg.complete && helpBg.naturalWidth > 0) {
+      ctx.drawImage(helpBg, 0, 0, width, height);
+    } else {
+      ctx.fillStyle = '#222';
+      ctx.fillRect(0, 0, width, height);
+    }
+    // Draw next button in bottom-right (red)
+    const nextBtnW = 120, nextBtnH = 50;
+    const nextBtnX = width - nextBtnW - 20, nextBtnY = height - nextBtnH - 20;
+    ctx.fillStyle = '#ff0000';
+    ctx.globalAlpha = 0.15;
+    ctx.fillRect(nextBtnX, nextBtnY, nextBtnW, nextBtnH);
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 24px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('NEXT', nextBtnX + nextBtnW/2, nextBtnY + nextBtnH / 2);
+    ctx.restore();
+  }
+
+  // Handle next button clicks for Help screen
+  canvas.addEventListener('mousedown', function(e) {
+    if (!showHelp) return;
+    const rect = canvas.getBoundingClientRect();
+    const mx = (e.clientX - rect.left) / (rect.right - rect.left) * width;
+    const my = (e.clientY - rect.top) / (rect.bottom - rect.top) * height;
+    // Next button hitbox
+    const nextBtnW = 120, nextBtnH = 50;
+    const nextBtnX = width - nextBtnW - 20, nextBtnY = height - nextBtnH - 20;
+    if (mx >= nextBtnX && mx <= nextBtnX + nextBtnW && my >= nextBtnY && my <= nextBtnY + nextBtnH) {
+      showHelp = false;
+    }
+  });
+
+  // Help screen touchscreen input
+  canvas.addEventListener('touchstart', function(e) {
+    if (!showHelp) return;
+    const rect = canvas.getBoundingClientRect();
+    for (const touch of e.touches) {
+      const tx = (touch.clientX - rect.left) / (rect.right - rect.left) * width;
+      const ty = (touch.clientY - rect.top) / (rect.bottom - rect.top) * height;
+      // Next button hitbox
+      const nextBtnW = 120, nextBtnH = 50;
+      const nextBtnX = width - nextBtnW - 20, nextBtnY = height - nextBtnH - 20;
+      if (tx >= nextBtnX && tx <= nextBtnX + nextBtnW && ty >= nextBtnY && ty <= nextBtnY + nextBtnH) {
+        showHelp = false;
+      }
+    }
+  });
+
   // Handle back button clicks for How to Play and Credits
   canvas.addEventListener('mousedown', function(e) {
     if (!showHowToPlay && !showCredits) return;
@@ -838,6 +903,11 @@
     lastTime = now;
     if (showStartScreen) {
       _renderStartScreen();
+      requestAnimationFrame(gameLoop);
+      return;
+    }
+    if (showHelp) {
+      _renderHelp();
       requestAnimationFrame(gameLoop);
       return;
     }
